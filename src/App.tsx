@@ -120,8 +120,6 @@ const App: React.FC = () => {
     fileInputRef.current?.click();
   }, []);
 
-  const theme = isDarkMode ? 'dark' : 'light';
-
   return (
     <div className={cn(
       "min-h-screen w-full bg-background p-4 md:p-8",
