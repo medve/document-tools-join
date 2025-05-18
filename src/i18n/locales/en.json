@@ -1,0 +1,13 @@
+{
+  "app": {
+    "title": "PDF Joiner",
+    "dropZone": {
+      "default": "Drag & drop PDF files here or",
+      "active": "Release to drop PDFs"
+    },
+    "addFiles": "Add Files",
+    "clear": "Clear",
+    "merge": "Merge",
+    "processing": "Processing..."
+  }
+} 
