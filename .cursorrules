@@ -1,4 +1,7 @@
 You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI and Tailwind CSS.
+
+Environment
+- Use yarn to manage depedencies
   
 Code Style and Structure
 - Write concise, technical TypeScript code with accurate examples.
