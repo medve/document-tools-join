@@ -32,9 +32,14 @@ export function useMupdf() {
     return mupdfWorker.current!.mergeDocuments(documents)
   }
 
+  const renderFirstPage = async (pdfBuffer: ArrayBuffer) => {
+    return mupdfWorker.current!.renderFirstPage(pdfBuffer);
+  }
+
   return {
     isWorkerInitialized,
     mergeDocuments,
+    renderFirstPage,
   }
 }
 

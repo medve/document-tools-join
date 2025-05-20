@@ -42,6 +42,39 @@ export class MupdfWorker {
       throw new Error('Failed to load document')
     }
   }
+
+  async renderFirstPage(pdfBuffer: ArrayBuffer): Promise<string> {
+    try {
+      const doc = mupdf.PDFDocument.openDocument(pdfBuffer, 'application/pdf');
+      const page = doc.loadPage(0);
+      // Render at 144 DPI (2x 72dpi)
+      const dpi = 144;
+      const zoom = dpi / 72;
+      const matrix = mupdf.Matrix.scale(zoom, zoom);
+      const pix = page.toPixmap(
+        matrix,
+        mupdf.ColorSpace.DeviceRGB,
+        false, // alpha: no transparency
+        true   // showExtras: render annotations/widgets
+      );
+      const png = pix.asPNG();
+      page.destroy();
+      doc.destroy();
+
+      // Convert Uint8Array to base64 in chunks to avoid stack overflow
+      const CHUNK_SIZE = 8192; // Process 8KB at a time
+      let binary = '';
+      for (let i = 0; i < png.length; i += CHUNK_SIZE) {
+        const chunk = png.slice(i, i + CHUNK_SIZE);
+        binary += String.fromCharCode.apply(null, chunk as unknown as number[]);
+      }
+      const base64 = btoa(binary);
+      return `data:image/png;base64,${base64}`;
+    } catch (error) {
+      console.error('Error rendering first page:', error);
+      throw new Error('Failed to render PDF preview');
+    }
+  }
 }
 
 Comlink.expose(new MupdfWorker())
