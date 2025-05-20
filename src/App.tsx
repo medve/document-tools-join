@@ -114,7 +114,7 @@ const App: React.FC = () => {
           <EmptyStateCard
             isDragActive={isDragActive}
             isProcessing={isProcessing}
-            onDrop={handleDrop}
+            onDrop={e => handleDrop(e, setIsDragActive)}
             onDragOver={handleDragOver}
             onDragEnter={e => handleDragEnter(e, setIsDragActive)}
             onDragLeave={e => handleDragLeave(e, setIsDragActive)}
@@ -132,7 +132,7 @@ const App: React.FC = () => {
               onReorder={handleReorder}
               isDragActive={isDragActive}
               isProcessing={isProcessing}
-              onDrop={handleDrop}
+              onDrop={e => handleDrop(e, setIsDragActive)}
               onDragOver={handleDragOver}
               onDragEnter={e => handleDragEnter(e, setIsDragActive)}
               onDragLeave={e => handleDragLeave(e, setIsDragActive)}

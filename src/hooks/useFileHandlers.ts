@@ -14,9 +14,10 @@ interface UseFileHandlersProps {
 export function useFileHandlers({ setFiles, setPreviews, generateId }: UseFileHandlersProps) {
   const dragCounter = useRef(0);
 
-  const handleDrop = useCallback((event: React.DragEvent<Element>) => {
+  const handleDrop = useCallback((event: React.DragEvent<Element>, setIsDragActive: (v: boolean) => void) => {
     event.preventDefault();
     dragCounter.current = 0;
+    setIsDragActive(false);
     const droppedFiles = Array.from(event.dataTransfer.files || []).filter(
       (file) => file.type === 'application/pdf'
     );

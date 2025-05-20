@@ -27,7 +27,7 @@ interface DragAndDropCardGridProps {
   onReorder: (newItems: CardItem[]) => void;
   isDragActive: boolean;
   isProcessing: boolean;
-  onDrop: (event: React.DragEvent<Element>) => void;
+  onDrop: (event: React.DragEvent<Element>, setIsDragActive: (v: boolean) => void) => void;
   onDragOver: (event: React.DragEvent<Element>) => void;
   onDragEnter: (event: React.DragEvent<Element>) => void;
   onDragLeave: (event: React.DragEvent<Element>) => void;
@@ -137,10 +137,12 @@ function SortableCardWrapper({ item, onDelete }: SortableCardWrapperProps) {
 
 export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDragActive, isProcessing, onDrop, onDragOver, onDragEnter, onDragLeave, onFileSelect }: DragAndDropCardGridProps) {
   const [internalItems, setInternalItems] = React.useState(items);
+  const [dragActive, setDragActive] = React.useState(isDragActive);
 
   React.useEffect(() => {
     setInternalItems(items);
-  }, [items]);
+    setDragActive(isDragActive);
+  }, [items, isDragActive]);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -155,14 +157,18 @@ export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDrag
     }
   }
 
+  function handleDrop(event: React.DragEvent<Element>) {
+    onDrop(event, setDragActive);
+  }
+
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={internalItems} strategy={rectSortingStrategy}>
         <div className="mx-auto max-w-[1040px] grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-2 sm:p-4 justify-center">
           <DragAndDropUploadCard
-            isDragActive={isDragActive}
+            isDragActive={dragActive}
             isProcessing={isProcessing}
-            onDrop={onDrop}
+            onDrop={handleDrop}
             onDragOver={onDragOver}
             onDragEnter={onDragEnter}
             onDragLeave={onDragLeave}
