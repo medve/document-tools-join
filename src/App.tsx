@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { EmptyStateCard } from '@/components/empty-state-card';
@@ -18,12 +17,10 @@ interface FileItem {
 }
 
 const App: React.FC = () => {
-  const { t } = useTranslation();
   const [files, setFiles] = useState<FileItem[]>([]);
   const [previews, setPreviews] = useState<Record<string, string | null>>({});
   const [isDragActive, setIsDragActive] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // File handlers
   const {
@@ -33,7 +30,6 @@ const App: React.FC = () => {
     handleDragLeave,
     handleFileInput,
     handleDelete,
-    handleClear,
   } = useFileHandlers({ setFiles, setPreviews, generateId });
 
   // PDF processing
@@ -134,6 +130,13 @@ const App: React.FC = () => {
               }))}
               onDelete={handleDelete}
               onReorder={handleReorder}
+              isDragActive={isDragActive}
+              isProcessing={isProcessing}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragEnter={e => handleDragEnter(e, setIsDragActive)}
+              onDragLeave={e => handleDragLeave(e, setIsDragActive)}
+              onFileSelect={handleFileInput}
             />
           </div>
         )}

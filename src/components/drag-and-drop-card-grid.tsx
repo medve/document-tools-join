@@ -9,6 +9,11 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent } from "@/components/ui/card";
 import { X } from "lucide-react";
+import { DragAndDropUploadCard } from "@/components/drag-and-drop-upload-card";
+import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+import { Transform } from '@dnd-kit/utilities';
+import { DragEndEvent } from '@dnd-kit/core';
+import { HTMLAttributes } from 'react';
 
 interface CardItem {
   id: string;
@@ -20,9 +25,29 @@ interface DragAndDropCardGridProps {
   items: CardItem[];
   onDelete: (id: string) => void;
   onReorder: (newItems: CardItem[]) => void;
+  isDragActive: boolean;
+  isProcessing: boolean;
+  onDrop: (event: React.DragEvent<Element>) => void;
+  onDragOver: (event: React.DragEvent<Element>) => void;
+  onDragEnter: (event: React.DragEvent<Element>) => void;
+  onDragLeave: (event: React.DragEvent<Element>) => void;
+  onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-function SortableCard({ id, name, preview, onDelete, listeners, attributes, setNodeRef, transform, transition, isDragging }: any) {
+interface SortableCardProps {
+  id: string;
+  name: string;
+  preview: string | null;
+  onDelete: (id: string) => void;
+  listeners: SyntheticListenerMap | undefined;
+  attributes: HTMLAttributes<Element>;
+  setNodeRef: (element: HTMLElement | null) => void;
+  transform: Transform | null;
+  transition: string | undefined;
+  isDragging: boolean;
+}
+
+function SortableCard({ id, name, preview, onDelete, listeners, attributes, setNodeRef, transform, transition, isDragging }: SortableCardProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -80,7 +105,12 @@ function SortableCard({ id, name, preview, onDelete, listeners, attributes, setN
   );
 }
 
-function SortableCardWrapper({ item, onDelete }: { item: CardItem; onDelete: (id: string) => void }) {
+interface SortableCardWrapperProps {
+  item: CardItem;
+  onDelete: (id: string) => void;
+}
+
+function SortableCardWrapper({ item, onDelete }: SortableCardWrapperProps) {
   const {
     attributes,
     listeners,
@@ -105,14 +135,14 @@ function SortableCardWrapper({ item, onDelete }: { item: CardItem; onDelete: (id
   );
 }
 
-export default function DragAndDropCardGrid({ items, onDelete, onReorder }: DragAndDropCardGridProps) {
+export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDragActive, isProcessing, onDrop, onDragOver, onDragEnter, onDragLeave, onFileSelect }: DragAndDropCardGridProps) {
   const [internalItems, setInternalItems] = React.useState(items);
 
   React.useEffect(() => {
     setInternalItems(items);
   }, [items]);
 
-  function handleDragEnd(event: any) {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (over && active.id !== over.id) {
       setInternalItems((prev) => {
@@ -129,6 +159,15 @@ export default function DragAndDropCardGrid({ items, onDelete, onReorder }: Drag
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={internalItems} strategy={rectSortingStrategy}>
         <div className="mx-auto max-w-[1040px] grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-2 sm:p-4 justify-center">
+          <DragAndDropUploadCard
+            isDragActive={isDragActive}
+            isProcessing={isProcessing}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragEnter={onDragEnter}
+            onDragLeave={onDragLeave}
+            onFileSelect={onFileSelect}
+          />
           {internalItems.map((item) => (
             <SortableCardWrapper key={item.id} item={item} onDelete={onDelete} />
           ))}

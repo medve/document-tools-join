@@ -9,6 +9,6 @@ declare module 'vite-plugin-copy' {
     targets: CopyTarget[];
   }
 
-  function copy(options: CopyOptions): any;
+  function copy(options: CopyOptions): unknown;
   export default copy;
 } 
