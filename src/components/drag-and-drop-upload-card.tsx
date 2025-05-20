@@ -33,8 +33,8 @@ export function DragAndDropUploadCard({
         className={cn(
           "relative w-full h-full flex flex-col justify-center items-center p-0 select-none bg-white transition-all duration-200",
           isDragActive
-            ? "border-2 border-blue-600 outline-none shadow-md"
-            : "border-2 border-dashed border-gray-300 outline-none hover:border-blue-400 hover:shadow-sm",
+            ? "border-2 border-dashed border-[#3072DE] outline-none shadow-md"
+            : "border-2 border-dashed border-gray-300 outline-none",
           isProcessing && "opacity-50 pointer-events-none"
         )}
         onDrop={isProcessing ? undefined : onDrop}
