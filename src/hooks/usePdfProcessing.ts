@@ -15,7 +15,7 @@ export function usePdfProcessing(
     console.log('isWorkerInitialized:', isWorkerInitialized);
     if (!isWorkerInitialized) return;
     console.log('files:', files);
-    const missing = files.filter(item => !(item.id in previews));
+    const missing = files.filter(item => previews[item.id] == null);
     console.log('missing previews for:', missing.map(f => f.file.name));
     if (missing.length === 0) return;
     const newEntries: Record<string, string | null> = {};
