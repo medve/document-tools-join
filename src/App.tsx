@@ -163,10 +163,10 @@ const App: React.FC = () => {
         </div>
       </header>
       {/* Main grid area */}
-      <main className="flex-1 flex items-center justify-center px-2 py-6">
+      <main className="flex-1 flex items-start justify-center px-2 py-6">
         {files.length === 0 ? (
           <div className="w-full flex flex-col items-center justify-center">
-            <div className="bg-white dark:bg-[#182B47] rounded-3xl shadow-lg p-10 max-w-lg w-full mx-auto flex flex-col items-center">
+            <div className="bg-white dark:bg-[#182B47] rounded-3xl shadow-lg p-10 max-w-[768px] w-full mx-auto flex flex-col items-center mt-16 md:mt-24">
               <div
                 className={cn(
                   "border-2 border-dashed rounded-xl p-8 w-full text-center transition-colors flex flex-col items-center justify-center",
@@ -299,15 +299,15 @@ const App: React.FC = () => {
       </main>
       {/* Fixed Join PDFs button at the bottom, overlays grid if needed */}
       {files.length > 0 && (
-        <div className="fixed bottom-8 left-0 w-full flex justify-center z-50 pointer-events-none">
+        <footer className="fixed bottom-0 left-0 w-full bg-white py-6 flex justify-center z-50 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
           <Button
-            className="w-full max-w-md bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-6 py-4 text-lg shadow-lg border-0 pointer-events-auto"
+            className="w-full max-w-md bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-6 py-4 text-lg shadow-lg border-0"
             disabled={isProcessing}
             onClick={handleMerge}
           >
             {isProcessing ? 'Joining…' : 'Join PDFs'}
           </Button>
-        </div>
+        </footer>
       )}
     </div>
   );
