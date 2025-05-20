@@ -1,0 +1,28 @@
+.empty-state-container {
+  @apply bg-white dark:bg-[#182B47] rounded-3xl shadow-lg p-10 max-w-[768px] w-full mx-auto flex flex-col items-center mt-16 md:mt-24;
+}
+
+.drop-zone {
+  @apply border-2 border-dashed rounded-xl p-8 w-full text-center transition-colors flex flex-col items-center justify-center border-gray-300 dark:border-gray-600 bg-transparent;
+}
+
+.drop-zone-active {
+  @apply border-blue-500 bg-blue-50 dark:bg-blue-900/20;
+}
+
+.drop-zone-disabled {
+  @apply opacity-50 pointer-events-none;
+}
+
+.upload-icon {
+  @apply w-12 h-12 mx-auto mb-4;
+}
+
+.upload-text {
+  @apply font-medium text-xl text-gray-900 dark:text-white mb-2;
+  line-height: 1.1;
+}
+
+.divider {
+  @apply text-gray-500 dark:text-gray-300 text-sm my-4;
+} 

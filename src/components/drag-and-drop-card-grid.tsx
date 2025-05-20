@@ -1,0 +1,139 @@
+import React from "react";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Card, CardContent } from "@/components/ui/card";
+import { X } from "lucide-react";
+
+interface CardItem {
+  id: string;
+  name: string;
+  preview: string | null;
+}
+
+interface DragAndDropCardGridProps {
+  items: CardItem[];
+  onDelete: (id: string) => void;
+  onReorder: (newItems: CardItem[]) => void;
+}
+
+function SortableCard({ id, name, preview, onDelete, listeners, attributes, setNodeRef, transform, transition, isDragging }: any) {
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.7 : 1,
+    cursor: 'grab',
+    width: '162px',
+    height: '180px',
+    minWidth: '162px',
+    minHeight: '180px',
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative"
+    >
+      <Card className="relative rounded-lg shadow-md bg-white border-0 w-full h-full flex flex-col justify-between p-0"
+        {...listeners}
+        {...attributes}
+      >
+        {/* Delete button */}
+        <button
+          className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center z-10 shadow-sm p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none"
+          aria-label="Delete"
+          onClick={e => { e.stopPropagation(); onDelete(id); }}
+          onPointerDown={e => e.stopPropagation()}
+          type="button"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        <CardContent className="flex flex-col items-center justify-center px-2 pt-6 pb-3">
+          <div className="bg-gray-100 rounded-lg mb-2 w-full h-[100px] flex items-center justify-center overflow-hidden p-2" style={{padding: '8px'}}>
+            {preview ? (
+              <img
+                src={preview}
+                alt={name}
+                className="object-contain w-full h-full rounded-lg"
+                style={{ maxHeight: '100px', maxWidth: '100%' }}
+              />
+            ) : (
+              <span className="text-gray-400 text-xs">Loading...</span>
+            )}
+          </div>
+          <p
+            className="truncate w-full text-center font-inter font-medium text-[12px] leading-[110%] tracking-normal text-[#1A1C20] opacity-80 mt-1 px-2"
+            style={{ lineHeight: '110%', letterSpacing: '0px', padding: '8px' }}
+            title={name}
+          >
+            {name}
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function SortableCardWrapper({ item, onDelete }: { item: CardItem; onDelete: (id: string) => void }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+  return (
+    <SortableCard
+      id={item.id}
+      name={item.name}
+      preview={item.preview}
+      onDelete={onDelete}
+      listeners={listeners}
+      attributes={attributes}
+      setNodeRef={setNodeRef}
+      transform={transform}
+      transition={transition}
+      isDragging={isDragging}
+    />
+  );
+}
+
+export default function DragAndDropCardGrid({ items, onDelete, onReorder }: DragAndDropCardGridProps) {
+  const [internalItems, setInternalItems] = React.useState(items);
+
+  React.useEffect(() => {
+    setInternalItems(items);
+  }, [items]);
+
+  function handleDragEnd(event: any) {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setInternalItems((prev) => {
+        const oldIndex = prev.findIndex((i) => i.id === active.id);
+        const newIndex = prev.findIndex((i) => i.id === over.id);
+        const newArr = arrayMove(prev, oldIndex, newIndex);
+        onReorder(newArr);
+        return newArr;
+      });
+    }
+  }
+
+  return (
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={internalItems} strategy={rectSortingStrategy}>
+        <div className="mx-auto max-w-[1040px] grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-2 sm:p-4 justify-center">
+          {internalItems.map((item) => (
+            <SortableCardWrapper key={item.id} item={item} onDelete={onDelete} />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
+  );
+} 
