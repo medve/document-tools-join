@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "PDF Joiner",
+    "description": "The name of the extension"
+  },
+  "appDescription": {
+    "message": "Use PDF joiner that helps to securely merge PDF files offline, combining documents into a single compiled file for easy sharing",
+    "description": "The description of the extension"
+  },
+  "actionTitle": {
+    "message": "Open PDF Joiner",
+    "description": "The title of the extension action"
+  }
+} 

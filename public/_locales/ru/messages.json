@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "Объединение PDF",
+    "description": "The name of the extension"
+  },
+  "appDescription": {
+    "message": "Используйте PDF joiner для безопасного объединения PDF файлов офлайн, комбинируя документы в один скомпилированный файл для удобного обмена",
+    "description": "The description of the extension"
+  },
+  "actionTitle": {
+    "message": "Открыть PDF Joiner",
+    "description": "The title of the extension action"
+  }
+} 
