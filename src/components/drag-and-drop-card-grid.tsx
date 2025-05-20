@@ -14,6 +14,7 @@ import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
 import { Transform } from '@dnd-kit/utilities';
 import { DragEndEvent } from '@dnd-kit/core';
 import { HTMLAttributes } from 'react';
+import { cn } from "@/lib/utils";
 
 interface CardItem {
   id: string;
@@ -65,9 +66,13 @@ function SortableCard({ id, name, preview, onDelete, listeners, attributes, setN
       style={style}
       className="relative"
     >
-      <Card className="relative rounded-lg shadow-md bg-white border-0 w-full h-full flex flex-col justify-between p-0"
+      <Card
+        className={cn(
+          "relative rounded-lg w-full h-full flex flex-col justify-between p-0 border transition-colors group border-[#D0D5DD] bg-white"
+        )}
         {...listeners}
         {...attributes}
+        tabIndex={0}
       >
         {/* Delete button */}
         <button
@@ -80,7 +85,7 @@ function SortableCard({ id, name, preview, onDelete, listeners, attributes, setN
           <X className="h-4 w-4" />
         </button>
         <CardContent className="flex flex-col items-center justify-center px-2 pt-6 pb-3">
-          <div className="bg-gray-100 rounded-lg mb-2 w-full h-[100px] flex items-center justify-center overflow-hidden p-2" style={{padding: '8px'}}>
+          <div className="rounded-lg mb-2 w-full h-[100px] flex items-center justify-center overflow-hidden p-2" style={{padding: '8px'}}>
             {preview ? (
               <img
                 src={preview}
@@ -93,8 +98,8 @@ function SortableCard({ id, name, preview, onDelete, listeners, attributes, setN
             )}
           </div>
           <p
-            className="truncate w-full text-center font-inter font-medium text-[12px] leading-[110%] tracking-normal text-[#1A1C20] opacity-80 mt-1 px-2"
-            style={{ lineHeight: '110%', letterSpacing: '0px', padding: '8px' }}
+            className="truncate w-full text-center font-inter font-medium text-[12px] leading-[13.2px] text-[rgba(26,28,32,0.8)] mt-1 px-2"
+            style={{ lineHeight: '13.2px', fontFamily: 'Inter, sans-serif', color: 'rgba(26,28,32,0.8)' }}
             title={name}
           >
             {name}
