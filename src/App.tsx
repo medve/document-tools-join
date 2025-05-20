@@ -1,11 +1,11 @@
 import React, { useCallback, useRef, useState, useEffect } from "react";
 import { useMupdf } from "./hooks/useMupdf";
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { X } from 'lucide-react';
+import { CardList } from '@/components/ui/card-list';
 
 function reorder<T>(list: T[], startIndex: number, endIndex: number): T[] {
   const result = Array.from(list);
@@ -132,11 +132,23 @@ const App: React.FC = () => {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const onDragEnd = useCallback((result: DropResult) => {
-    if (!result.destination) return;
-    setFiles((prev) => reorder(prev, result.source.index, result.destination!.index));
-    setPreviews((prev) => reorder(prev, result.source.index, result.destination!.index));
-  }, []);
+  const handleReorder = useCallback((newItems: any[]) => {
+    // Remove the add-card if present
+    const reordered = newItems.filter(item => !item.isAddCard);
+    setFiles(prevFiles => {
+      // Map new order to files
+      return reordered.map(item => {
+        const idx = files.findIndex(f => item.id.startsWith(f.name));
+        return files[idx];
+      });
+    });
+    setPreviews(prevPreviews => {
+      return reordered.map(item => {
+        const idx = files.findIndex(f => item.id.startsWith(f.name));
+        return previews[idx];
+      });
+    });
+  }, [files, previews]);
 
   // Helper to crop file name
   function cropFileName(name: string, max: number = 32): string {
@@ -206,94 +218,23 @@ const App: React.FC = () => {
           </div>
         ) : (
           <div className="w-full max-w-screen-xl mx-auto flex-1 flex flex-col">
-            <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable droppableId="pdf-grid" direction="horizontal" renderClone={null}>
-                {(provided) => (
-                  <ul
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-8 w-full min-h-[320px] max-h-[calc(100vh-180px)] overflow-y-auto pb-40"
-                    style={{ transition: 'all 0.2s' }}
-                  >
-                    {/* Drag-and-drop + add tile always first */}
-                    <li
-                      className={cn(
-                        "flex flex-col items-center justify-center h-48 bg-white/0 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-[#22345A] transition-colors",
-                        isDragActive && "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                      )}
-                      onClick={() => fileInputRef.current?.click()}
-                      onDrop={isProcessing ? undefined : handleDrop}
-                      onDragOver={isProcessing ? undefined : handleDragOver}
-                      onDragEnter={isProcessing ? undefined : handleDragEnter}
-                      onDragLeave={isProcessing ? undefined : handleDragLeave}
-                      style={{ minWidth: 180 }}
-                    >
-                      <img src="/icons/upload-cloud.svg" alt="Upload" className="w-8 h-8 mb-2" />
-                      <span className="text-sm text-gray-700 dark:text-gray-200 text-center mb-2">Drag and drop<br />PDF files here</span>
-                      <button
-                        className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded px-4 py-2 text-sm mt-2"
-                        disabled={isProcessing}
-                        onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                      >
-                        Add PDF files
-                      </button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="application/pdf"
-                        multiple
-                        onChange={handleFileInput}
-                        disabled={isProcessing}
-                        className="hidden"
-                      />
-                    </li>
-                    {/* Draggable file tiles */}
-                    {files.map((file, index) => (
-                      <Draggable key={file.name + index} draggableId={file.name + index} index={index}>
-                        {(provided, snapshot) => (
-                          <li
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={cn(
-                              "relative flex flex-col items-center h-48 bg-white dark:bg-[#22345A] rounded-xl shadow border border-gray-200 dark:border-gray-700 p-2",
-                              snapshot.isDragging && "shadow-lg z-10 scale-105"
-                            )}
-                            style={{ minWidth: 180 }}
-                          >
-                            <button
-                              className="absolute top-1 right-1 z-20 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-                              onClick={() => handleDelete(index)}
-                              tabIndex={-1}
-                              aria-label="Remove file"
-                            >
-                              <X className="w-4 h-4 text-gray-500 dark:text-gray-300" />
-                            </button>
-                            <div className="flex-1 flex items-center justify-center w-full">
-                              {previews[index] ? (
-                                <img
-                                  src={previews[index]!}
-                                  alt={file.name}
-                                  className="object-contain w-full h-32 rounded"
-                                  draggable={false}
-                                  loading="lazy"
-                                />
-                              ) : (
-                                <div className="w-full h-32 flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs">Loading…</div>
-                              )}
-                            </div>
-                            <span className="block mt-2 text-xs text-center text-gray-900 dark:text-white truncate max-w-full" title={file.name}>
-                              {cropFileName(file.name)}
-                            </span>
-                          </li>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </ul>
-                )}
-              </Droppable>
-            </DragDropContext>
+            <CardList
+              items={[
+                {
+                  id: 'add-card',
+                  isAddCard: true,
+                  onAddFiles: () => fileInputRef.current?.click(),
+                  isProcessing,
+                },
+                ...files.map((file, index) => ({
+                  id: file.name + index,
+                  label: cropFileName(file.name),
+                  preview: previews[index],
+                  onDelete: () => handleDelete(index),
+                })),
+              ]}
+              onReorder={handleReorder}
+            />
           </div>
         )}
       </main>
