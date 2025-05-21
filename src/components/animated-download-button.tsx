@@ -8,10 +8,7 @@ interface AnimatedDownloadButtonProps {
   isSuccess?: boolean;
 }
 
-type ButtonState = 'ready' | 'loading' | 'complete';
-
 export function AnimatedDownloadButton({ onClick, children, isLoading = false, isSuccess = false }: AnimatedDownloadButtonProps) {
-  const [state, setState] = useState<ButtonState>('ready');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [buttonCenter, setButtonCenter] = useState<{ x: number; y: number }>({ x: 0, y: 0 });

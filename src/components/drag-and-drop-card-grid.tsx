@@ -168,6 +168,22 @@ export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDrag
 
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <div className="w-full flex justify-center">
+        <p
+          className="mb-2 text-center"
+          style={{
+            color: 'black',
+            fontSize: '14px',
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 400,
+            lineHeight: '15.4px',
+            wordWrap: 'break-word',
+            maxWidth: '1000px',
+          }}
+        >
+          To change the order of your PDFs, drag and drop the files as you want.
+        </p>
+      </div>
       <SortableContext items={internalItems} strategy={rectSortingStrategy}>
         <div className="mx-auto max-w-[1040px] grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-2 sm:p-4 justify-center">
           <DragAndDropUploadCard

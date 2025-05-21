@@ -17,6 +17,15 @@
       background-color: #f5f7fa;
       color: #333;
       line-height: 1.6;
+      background-image: url('/background-tile.svg');
+      background-repeat: repeat;
+      background-size: 64px 64px;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #18181b;
+        background-image: url('/background-tile-dark.svg');
+      }
     }
     .container {
       max-width: 800px;

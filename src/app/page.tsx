@@ -1,3 +1,7 @@
-import { useState, useEffect } from "react";
-import { useCallback, useMemo } from "react";
-// ... existing code ... 
+export default function Page() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <h1>PDF Joiner</h1>
+    </main>
+  );
+} 
