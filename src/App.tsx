@@ -145,15 +145,7 @@ const App: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-lg flex flex-col items-center px-8 py-10 gap-6 max-w-[600px] w-full">
               <img src="/icons/thumbs-up.svg" alt="Merged!" className="w-10 h-10 mb-2" />
               <div className="font-gabarito text-2xl font-bold text-center text-[#0C1A2D]">PDFs have been merged!</div>
-              <div className="flex flex-row justify-center items-center gap-2 mt-4 self-stretch">
-                <button
-                  className="flex items-center p-0 m-0 bg-transparent hover:opacity-70 transition"
-                  onClick={clearPdfState}
-                  aria-label="Back"
-                  type="button"
-                >
-                  <img src="/icons/arrow-left-circle.svg" alt="Back" className="w-10 h-10" />
-                </button>
+              <div className="flex flex-row items-center gap-2 mt-6">
                 <AnimatedDownloadButton
                   isLoading={isDownloadLoading}
                   isSuccess={isDownloadSuccess}
@@ -162,6 +154,13 @@ const App: React.FC = () => {
                   Download merged PDF
                 </AnimatedDownloadButton>
               </div>
+              <Button
+                className="mt-4 w-full max-w-xs mx-auto bg-gray-200 text-gray-800 hover:bg-gray-300"
+                onClick={clearPdfState}
+              >
+                <img src="/icons/arrow-left-circle.svg" alt="Back" className="w-5 h-5 mr-2" />
+                To main page
+              </Button>
             </div>
           </div>
         ) : files.length === 0 ? (
