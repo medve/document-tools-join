@@ -68,7 +68,7 @@ function SortableCard({ id, name, preview, onDelete, listeners, attributes, setN
     >
       <Card
         className={cn(
-          "relative rounded-lg w-full h-full flex flex-col justify-between p-0 border transition-colors group border-[#D0D5DD] bg-white"
+          "relative rounded-lg w-full h-full flex flex-col justify-between p-0 border transition-colors group border-[#D0D5DD] bg-white dark:bg-[#182B47]"
         )}
         {...listeners}
         {...attributes}
@@ -76,7 +76,7 @@ function SortableCard({ id, name, preview, onDelete, listeners, attributes, setN
       >
         {/* Delete button */}
         <button
-          className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center z-10 shadow-sm p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none"
+          className="absolute top-2 right-2 w-7 h-7 bg-white dark:bg-[#101A26] rounded-full flex items-center justify-center z-10 shadow-sm p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none"
           aria-label="Delete"
           onClick={e => { e.stopPropagation(); onDelete(id); }}
           onPointerDown={e => e.stopPropagation()}
@@ -98,8 +98,8 @@ function SortableCard({ id, name, preview, onDelete, listeners, attributes, setN
             )}
           </div>
           <p
-            className="truncate w-full text-center font-inter font-medium text-[12px] leading-[13.2px] text-[rgba(26,28,32,0.8)] mt-1 px-2"
-            style={{ lineHeight: '13.2px', fontFamily: 'Inter, sans-serif', color: 'rgba(26,28,32,0.8)' }}
+            className="truncate w-full text-center font-inter font-medium text-[12px] leading-[13.2px] text-[rgba(26,28,32,0.8)] dark:text-white mt-1 px-2"
+            style={{ lineHeight: '13.2px', fontFamily: 'Inter, sans-serif' }}
             title={name}
           >
             {name}
@@ -170,9 +170,8 @@ export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDrag
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div className="w-full flex justify-center">
         <p
-          className="mb-2 text-center"
+          className="mb-2 text-center text-foreground dark:text-white"
           style={{
-            color: 'black',
             fontSize: '14px',
             fontFamily: 'Inter, sans-serif',
             fontWeight: 400,

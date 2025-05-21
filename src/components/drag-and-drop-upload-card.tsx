@@ -31,7 +31,7 @@ export function DragAndDropUploadCard({
     >
       <Card
         className={cn(
-          "relative w-full h-full flex flex-col justify-center items-center p-0 select-none bg-white transition-all duration-200",
+          "relative w-full h-full flex flex-col justify-center items-center p-0 select-none bg-white dark:bg-[#182B47] transition-all duration-200",
           isDragActive
             ? "border-2 border-dashed border-[#3072DE] outline-none shadow-md"
             : "border-2 border-dashed border-gray-300 outline-none",
@@ -52,7 +52,7 @@ export function DragAndDropUploadCard({
               className="w-8 h-8"
               draggable={false}
             />
-            <p className="w-full text-center font-inter font-semibold text-[14px] leading-[15.4px] text-[#0C1A2D]" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+            <p className="w-full text-center font-inter font-semibold text-[14px] leading-[15.4px] text-[#0C1A2D] dark:text-white" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
               Drag and drop PDF files here
             </p>
           </div>
