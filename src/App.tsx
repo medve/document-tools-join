@@ -21,6 +21,8 @@ const App: React.FC = () => {
   const [previews, setPreviews] = useState<Record<string, string | null>>({});
   const [isDragActive, setIsDragActive] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
+  const [mergedPdfBlob, setMergedPdfBlob] = useState<Blob | null>(null);
 
   // File handlers
   const {
@@ -30,6 +32,7 @@ const App: React.FC = () => {
     handleDragLeave,
     handleFileInput,
     handleDelete,
+    handleClear,
   } = useFileHandlers({ setFiles, setPreviews, generateId });
 
   // PDF processing
@@ -63,13 +66,8 @@ const App: React.FC = () => {
       const mergedPdf = await mergePdfs();
       const blob = new Blob([mergedPdf], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'merged.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      setMergedPdfUrl(url);
+      setMergedPdfBlob(blob);
     } catch (error) {
       console.error('Error merging PDFs:', error);
       alert('Failed to merge PDFs. Please try again.');
@@ -93,6 +91,34 @@ const App: React.FC = () => {
     return name.slice(0, max - (ext?.length ?? 0) - 4) + '...' + (ext ? '.' + ext : '');
   }
 
+  // Helper to clear all PDF-related state
+  function clearPdfState() {
+    handleClear();
+    setMergedPdfUrl(null);
+    setMergedPdfBlob(null);
+  }
+
+  // Handler for back button
+  function handleBack() {
+    setFiles([]);
+    setPreviews({});
+    setMergedPdfUrl(null);
+    setMergedPdfBlob(null);
+  }
+
+  // Handler for download button
+  function handleDownload() {
+    if (!mergedPdfBlob) return;
+    const url = mergedPdfUrl || URL.createObjectURL(mergedPdfBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'merged.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    // Do not revokeObjectURL immediately, user may want to download again
+  }
+
   return (
     <div
       className={cn(
@@ -105,10 +131,7 @@ const App: React.FC = () => {
       <header className="w-full flex items-center justify-between px-6 py-4 md:px-12 md:py-6">
         <div 
           className="flex items-center gap-3 cursor-pointer" 
-          onClick={() => {
-            setFiles([]);
-            setPreviews({});
-          }}
+          onClick={clearPdfState}
         >
           <img src="/icons/app-icon.svg" alt="PDF joiner logo" className="h-8 w-8" />
           <span className="font-gabarito font-semibold text-lg md:text-xl text-gray-900 dark:text-white tracking-tight" style={{letterSpacing: '-1px', lineHeight: '0.9', fontFamily: 'Gabarito, sans-serif'}}>PDF joiner</span>
@@ -116,7 +139,32 @@ const App: React.FC = () => {
       </header>
       {/* Main grid area */}
       <main className="flex-1 flex items-start justify-center px-2 py-6">
-        {files.length === 0 ? (
+        {mergedPdfUrl ? (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-lg flex flex-col items-center px-8 py-10 gap-6 max-w-md w-full">
+              <img src="/icons/thumbs-up.svg" alt="Merged!" className="w-10 h-10 mb-2" />
+              <div className="font-gabarito text-2xl font-bold text-center text-[#0C1A2D]">PDFs have been merged!</div>
+              <div className="flex flex-row gap-4 w-full justify-center items-center">
+                <button
+                  className="p-0 m-0 bg-transparent hover:opacity-70 transition"
+                  onClick={clearPdfState}
+                  aria-label="Back"
+                  type="button"
+                >
+                  <img src="/icons/arrow-left-circle.svg" alt="Back" className="w-8 h-8" />
+                </button>
+                <button
+                  className="flex-1 flex items-center justify-center gap-2 bg-black text-white font-bold text-base rounded-full px-6 py-3 transition-colors hover:bg-gray-900"
+                  onClick={handleDownload}
+                  type="button"
+                >
+                  <img src="/icons/download.svg" alt="Download" className="w-5 h-5" />
+                  Download merged PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : files.length === 0 ? (
           <EmptyStateCard
             isDragActive={isDragActive}
             isProcessing={isProcessing}
@@ -148,7 +196,7 @@ const App: React.FC = () => {
         )}
       </main>
       {/* Fixed Join PDFs button at the bottom, overlays grid if needed */}
-      {files.length > 0 && (
+      {files.length > 0 && !mergedPdfUrl && (
         <footer className="fixed bottom-0 left-0 w-full bg-white py-6 flex justify-center z-50 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
           <Button
             className="w-full max-w-md bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg px-6 py-4 text-lg shadow-lg border-0"

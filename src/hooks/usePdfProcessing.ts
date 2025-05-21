@@ -11,12 +11,8 @@ export function usePdfProcessing(
 
   // Generate previews for new files only
   const generatePreviews = useCallback(async () => {
-    console.log('generatePreviews called');
-    console.log('isWorkerInitialized:', isWorkerInitialized);
     if (!isWorkerInitialized) return;
-    console.log('files:', files);
     const missing = files.filter(item => previews[item.id] == null);
-    console.log('missing previews for:', missing.map(f => f.file.name));
     if (missing.length === 0) return;
     const newEntries: Record<string, string | null> = {};
     await Promise.all(
@@ -24,10 +20,8 @@ export function usePdfProcessing(
         try {
           const buffer = await item.file.arrayBuffer();
           const preview = await renderFirstPage(buffer);
-          console.log('renderFirstPage result for', item.file.name, ':', preview);
           newEntries[item.id] = preview;
         } catch (err) {
-          console.error('Error rendering preview for', item.file.name, err);
           newEntries[item.id] = null;
         }
       })
