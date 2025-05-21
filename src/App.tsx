@@ -6,6 +6,7 @@ import DragAndDropCardGrid from '@/components/drag-and-drop-card-grid';
 import '@/styles/empty-state.css';
 import { useFileHandlers } from './hooks/useFileHandlers';
 import { usePdfProcessing } from './hooks/usePdfProcessing';
+import { AnimatedDownloadButton } from "@/components/animated-download-button";
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -23,6 +24,8 @@ const App: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
   const [mergedPdfBlob, setMergedPdfBlob] = useState<Blob | null>(null);
+  const [isDownloadSuccess, setIsDownloadSuccess] = useState(false);
+  const [isDownloadLoading, setIsDownloadLoading] = useState(false);
 
   // File handlers
   const {
@@ -98,17 +101,12 @@ const App: React.FC = () => {
     setMergedPdfBlob(null);
   }
 
-  // Handler for back button
-  function handleBack() {
-    setFiles([]);
-    setPreviews({});
-    setMergedPdfUrl(null);
-    setMergedPdfBlob(null);
-  }
-
   // Handler for download button
-  function handleDownload() {
+  async function handleDownload() {
     if (!mergedPdfBlob) return;
+    setIsDownloadLoading(true);
+    // Simulate loading (or do real async work here)
+    await new Promise(r => setTimeout(r, 1200));
     const url = mergedPdfUrl || URL.createObjectURL(mergedPdfBlob);
     const link = document.createElement('a');
     link.href = url;
@@ -116,6 +114,9 @@ const App: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setIsDownloadSuccess(true);
+    setIsDownloadLoading(false);
+    setTimeout(() => setIsDownloadSuccess(false), 1800);
     // Do not revokeObjectURL immediately, user may want to download again
   }
 
@@ -141,26 +142,25 @@ const App: React.FC = () => {
       <main className="flex-1 flex items-start justify-center px-2 py-6">
         {mergedPdfUrl ? (
           <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-lg flex flex-col items-center px-8 py-10 gap-6 max-w-md w-full">
+            <div className="bg-white rounded-2xl shadow-lg flex flex-col items-center px-8 py-10 gap-6 max-w-[600px] w-full">
               <img src="/icons/thumbs-up.svg" alt="Merged!" className="w-10 h-10 mb-2" />
               <div className="font-gabarito text-2xl font-bold text-center text-[#0C1A2D]">PDFs have been merged!</div>
-              <div className="flex flex-row gap-4 w-full justify-center items-center">
+              <div className="flex flex-row justify-center items-center gap-2 mt-4 self-stretch">
                 <button
-                  className="p-0 m-0 bg-transparent hover:opacity-70 transition"
+                  className="flex items-center p-0 m-0 bg-transparent hover:opacity-70 transition"
                   onClick={clearPdfState}
                   aria-label="Back"
                   type="button"
                 >
-                  <img src="/icons/arrow-left-circle.svg" alt="Back" className="w-8 h-8" />
+                  <img src="/icons/arrow-left-circle.svg" alt="Back" className="w-10 h-10" />
                 </button>
-                <button
-                  className="flex-1 flex items-center justify-center gap-2 bg-black text-white font-bold text-base rounded-full px-6 py-3 transition-colors hover:bg-gray-900"
+                <AnimatedDownloadButton
+                  isLoading={isDownloadLoading}
+                  isSuccess={isDownloadSuccess}
                   onClick={handleDownload}
-                  type="button"
                 >
-                  <img src="/icons/download.svg" alt="Download" className="w-5 h-5" />
                   Download merged PDF
-                </button>
+                </AnimatedDownloadButton>
               </div>
             </div>
           </div>

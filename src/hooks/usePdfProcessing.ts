@@ -21,7 +21,7 @@ export function usePdfProcessing(
           const buffer = await item.file.arrayBuffer();
           const preview = await renderFirstPage(buffer);
           newEntries[item.id] = preview;
-        } catch (err) {
+        } catch {
           newEntries[item.id] = null;
         }
       })
