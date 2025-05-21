@@ -197,7 +197,7 @@ export function AnimatedDownloadButton({ onClick, children, isLoading = false, i
     <div className="w-full flex justify-center">
       <button
         ref={buttonRef}
-        className="flex items-center gap-2 bg-neutral-800 hover:bg-black text-white rounded-full text-base font-semibold px-8 py-4 shadow transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="flex items-center gap-2 bg-neutral-800 dark:bg-white text-white dark:text-gray-900 rounded-full text-base font-semibold px-8 py-4 shadow transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
         onClick={handleClick}
         disabled={disabled}
         type="button"
