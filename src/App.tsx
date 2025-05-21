@@ -103,7 +103,13 @@ const App: React.FC = () => {
     >
       {/* Header */}
       <header className="w-full flex items-center justify-between px-6 py-4 md:px-12 md:py-6">
-        <div className="flex items-center gap-3">
+        <div 
+          className="flex items-center gap-3 cursor-pointer" 
+          onClick={() => {
+            setFiles([]);
+            setPreviews({});
+          }}
+        >
           <img src="/icons/app-icon.svg" alt="PDF joiner logo" className="h-8 w-8" />
           <span className="font-gabarito font-semibold text-lg md:text-xl text-gray-900 dark:text-white tracking-tight" style={{letterSpacing: '-1px', lineHeight: '0.9', fontFamily: 'Gabarito, sans-serif'}}>PDF joiner</span>
         </div>
