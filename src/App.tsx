@@ -128,8 +128,8 @@ const App: React.FC = () => {
         "dark:bg-[url('/background-tile-dark.svg')] dark:bg-repeat dark:bg-[length:64px_64px]"
       )}
     >
-      {/* Header */}
-      <header className="w-full flex items-center justify-between px-6 py-4 md:px-12 md:py-6">
+      {/* Header - always on top */}
+      <header className="w-full flex items-center justify-between px-6 py-4 md:px-12 md:py-6 z-50 fixed top-0 left-0 bg-transparent dark:bg-transparent">
         <div 
           className="flex items-center gap-3 cursor-pointer" 
           onClick={clearPdfState}
@@ -139,15 +139,15 @@ const App: React.FC = () => {
         </div>
       </header>
       {/* Main grid area */}
-      <main className="flex-1 flex items-start justify-center px-2 py-6">
+      <main className="flex-1 flex items-start justify-center px-2 py-6 pt-24">
         {mergedPdfUrl ? (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 flex items-center justify-center z-40">
             <div className="bg-white dark:bg-[#182B47] rounded-2xl shadow-lg flex flex-col items-center px-8 py-10 gap-6 max-w-[600px] w-full">
               <img src="/icons/thumbs-up.svg" alt="Merged!" className="w-10 h-10 mb-2" />
               <div className="font-gabarito text-2xl font-bold text-center text-[#0C1A2D] dark:text-white">PDFs have been merged!</div>
               <div className="flex flex-row items-center gap-2 mt-6">
                 <div className="w-full flex justify-center">
-                  <div className="rounded-full bg-neutral-800 text-white dark:bg-gray-200 dark:text-gray-900">
+                  <div className="rounded-full bg-neutral-800 dark:bg-white text-white dark:text-gray-900">
                     <AnimatedDownloadButton
                       isLoading={isDownloadLoading}
                       isSuccess={isDownloadSuccess}
