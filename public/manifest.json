@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "__MSG_appName__",
     "version": "1.0.0",
-    "description": "__MSG_appDescription__",
+    "description": "__MSG_shortDesc__",
     "background": {
       "service_worker": "background.js"
     },
@@ -26,5 +26,5 @@
     "default_locale": "en",
     "homepage_url": "https://github.com/your-user/your-extension",
     "author": "Anton Medvedev",
-    "license": "AGPL-3.0"
+    "host_permissions": ["https://*.amplitude.com/"]
 }

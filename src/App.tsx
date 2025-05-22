@@ -10,9 +10,10 @@ import '@/styles/empty-state.css';
 import { useFileHandlers } from './hooks/useFileHandlers';
 import { usePdfProcessing } from './hooks/usePdfProcessing';
 import { AnimatedDownloadButton } from "@/components/animated-download-button";
+import { trackError, trackEvent } from '@/lib/amplitude';
 
-const CONTACT_EMAIL = "pt.kapibaradigitalservices@gmail.com";
-const GITHUB_URL = "https://github.com/medve/document-tools-join";
+const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL || "pt.kapibaradigitalservices@gmail.com";
+const GITHUB_URL = import.meta.env.VITE_GITHUB_URL || "https://github.com/medve/document-tools-join";
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -34,6 +35,13 @@ const App: React.FC = () => {
   const [isDownloadLoading, setIsDownloadLoading] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
 
+  // Track app opened
+  useEffect(() => {
+    trackEvent('app_opened', {
+      version: import.meta.env.VITE_APP_VERSION
+    });
+  }, []);
+
   // File handlers
   const {
     handleDrop,
@@ -50,17 +58,23 @@ const App: React.FC = () => {
 
   // Dark mode effect
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    function updateDarkMode(e?: MediaQueryListEvent) {
-      if ((e && e.matches) || (!e && mediaQuery.matches)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
+    try {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      function updateDarkMode(e?: MediaQueryListEvent) {
+        if ((e && e.matches) || (!e && mediaQuery.matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
       }
+      updateDarkMode();
+      mediaQuery.addEventListener('change', updateDarkMode);
+      return () => mediaQuery.removeEventListener('change', updateDarkMode);
+    } catch (error) {
+      trackError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'dark_mode_handler'
+      });
     }
-    updateDarkMode();
-    mediaQuery.addEventListener('change', updateDarkMode);
-    return () => mediaQuery.removeEventListener('change', updateDarkMode);
   }, []);
 
   // Generate previews when files are added
@@ -78,53 +92,94 @@ const App: React.FC = () => {
       const url = URL.createObjectURL(blob);
       setMergedPdfUrl(url);
       setMergedPdfBlob(blob);
+      trackEvent('files_joined', {
+        count: files.length,
+        names: files.map(f => f.file.name),
+        sizes: files.map(f => f.file.size),
+        resultSize: blob.size
+      });
     } catch (error) {
-      console.error('Error merging PDFs:', error);
+      trackError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'pdf_merge_handler',
+        fileCount: files.length
+      });
       alert('Failed to merge PDFs. Please try again.');
     } finally {
       setIsProcessing(false);
     }
-  }, [mergePdfs, isProcessing]);
+  }, [mergePdfs, isProcessing, files]);
 
   // Reorder handler
   const handleReorder = useCallback((newItems: {id: string}[]) => {
-    setFiles(prevFiles => {
-      // Map new order to files by id
-      return newItems.map(item => prevFiles.find(f => f.id === item.id)).filter(Boolean) as FileItem[];
-    });
+    try {
+      setFiles(prevFiles => {
+        return newItems.map(item => prevFiles.find(f => f.id === item.id)).filter(Boolean) as FileItem[];
+      });
+    } catch (error) {
+      trackError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'file_reorder_handler',
+        itemCount: newItems.length
+      });
+    }
   }, []);
 
   // Helper to crop file name
   function cropFileName(name: string, max: number = 32): string {
-    if (name.length <= max) return name;
-    const ext = name.split('.').pop();
-    return name.slice(0, max - (ext?.length ?? 0) - 4) + '...' + (ext ? '.' + ext : '');
+    try {
+      if (name.length <= max) return name;
+      const ext = name.split('.').pop();
+      return name.slice(0, max - (ext?.length ?? 0) - 4) + '...' + (ext ? '.' + ext : '');
+    } catch (error) {
+      trackError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'file_name_crop',
+        fileName: name,
+        maxLength: max
+      });
+      return name;
+    }
   }
 
   // Helper to clear all PDF-related state
   function clearPdfState() {
-    handleClear();
-    setMergedPdfUrl(null);
-    setMergedPdfBlob(null);
+    try {
+      handleClear();
+      setMergedPdfUrl(null);
+      setMergedPdfBlob(null);
+    } catch (error) {
+      trackError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'pdf_state_clear'
+      });
+    }
   }
 
   // Handler for download button
   async function handleDownload() {
     if (!mergedPdfBlob) return;
     setIsDownloadLoading(true);
-    // Simulate loading (or do real async work here)
-    await new Promise(r => setTimeout(r, 1200));
-    const url = mergedPdfUrl || URL.createObjectURL(mergedPdfBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'merged.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setIsDownloadSuccess(true);
-    setIsDownloadLoading(false);
-    setTimeout(() => setIsDownloadSuccess(false), 1800);
-    // Do not revokeObjectURL immediately, user may want to download again
+    try {
+      // Simulate loading (or do real async work here)
+      await new Promise(r => setTimeout(r, 1200));
+      const url = mergedPdfUrl || URL.createObjectURL(mergedPdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'merged.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setIsDownloadSuccess(true);
+      setTimeout(() => setIsDownloadSuccess(false), 1800);
+      trackEvent('file_downloaded', {
+        size: mergedPdfBlob.size,
+        url: url
+      });
+    } catch (error) {
+      trackError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'pdf_download_handler',
+        blobSize: mergedPdfBlob.size
+      });
+    } finally {
+      setIsDownloadLoading(false);
+    }
   }
 
   return (

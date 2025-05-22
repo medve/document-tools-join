@@ -38,7 +38,7 @@ export function usePdfProcessing(
   // Merge PDFs
   const mergePdfs = useCallback(async () => {
     const fileBuffers = await Promise.all(files.map(item => item.file.arrayBuffer()));
-    return mergeDocuments(fileBuffers);
+    return await mergeDocuments(fileBuffers);
   }, [files, mergeDocuments]);
 
   return {

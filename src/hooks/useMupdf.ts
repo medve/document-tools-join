@@ -6,7 +6,6 @@ import * as Comlink from "comlink";
 import { Remote } from "comlink";
 import { useEffect, useRef, useState } from "react";
 
-
 export function useMupdf() {
   const [isWorkerInitialized, setIsWorkerInitialized] = useState(false);
   const mupdfWorker = useRef<Remote<MupdfWorker>>();
@@ -32,11 +31,11 @@ export function useMupdf() {
   }, []);
 
   const mergeDocuments = async (documents: ArrayBuffer[]) => {
-    return mupdfWorker.current!.mergeDocuments(documents)
+    return await mupdfWorker.current!.mergeDocuments(documents);
   }
 
   const renderFirstPage = async (pdfBuffer: ArrayBuffer) => {
-    return mupdfWorker.current!.renderFirstPage(pdfBuffer);
+    return await mupdfWorker.current!.renderFirstPage(pdfBuffer);
   }
 
   return {

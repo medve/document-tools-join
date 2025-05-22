@@ -6,6 +6,25 @@ import * as Comlink from 'comlink'
 import * as mupdf from "mupdf/mupdfjs"
 
 export const MUPDF_LOADED = 'MUPDF_LOADED'
+const OPEN_DOCUMENT_TIMEOUT = 10000; // 10 seconds timeout
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`Operation timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    promise
+      .then((result) => {
+        clearTimeout(timeoutId);
+        resolve(result);
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      });
+  });
+}
 
 export class MupdfWorker {
 
@@ -14,21 +33,25 @@ export class MupdfWorker {
   }
 
   private async initializeMupdf() {
-    try {
       postMessage(MUPDF_LOADED);
-    } catch (error) {
-      console.error("Failed to initialize MuPDF:", error);
-    }
+  }
+
+  private async openDocumentWithTimeout(buffer: ArrayBuffer): Promise<mupdf.PDFDocument> {
+    return withTimeout(
+      Promise.resolve(mupdf.PDFDocument.openDocument(buffer, 'application/pdf')),
+      OPEN_DOCUMENT_TIMEOUT
+    );
   }
 
   async mergeDocuments(documents: ArrayBuffer[]): Promise<ArrayBuffer> {
     if (documents.length === 0) throw new Error('No documents to merge')
 
+    const mergedDoc = await this.openDocumentWithTimeout(documents[0]);
     try {
-      const mergedDoc = mupdf.PDFDocument.openDocument(documents[0], 'application/pdf')
       for (const buf of documents.slice(1)) {
-        const src = mupdf.PDFDocument.openDocument(buf, 'application/pdf')
+        const src = await this.openDocumentWithTimeout(buf);
         mergedDoc.merge(src) // defaults: fromPage=0, toPage=-1, startAt=-1, rotate=0
+        src.destroy();
       }
       
       const mergedDocument = await mergedDoc.saveToBuffer(
@@ -37,18 +60,15 @@ export class MupdfWorker {
         "color-lossy-image-recompress-method=jpeg,"+
         "color-lossy-image-recompress-quality=40,",
       );
-      mergedDoc.destroy();
-      
       return mergedDocument.asUint8Array();
-    } catch (error) {
-      console.error('Error loading document:', error)
-      throw new Error('Failed to load document')
+    } finally {
+      mergedDoc.destroy();
     }
   }
 
   async renderFirstPage(pdfBuffer: ArrayBuffer): Promise<string> {
+    const doc = await this.openDocumentWithTimeout(pdfBuffer);
     try {
-      const doc = mupdf.PDFDocument.openDocument(pdfBuffer, 'application/pdf');
       const page = doc.loadPage(0);
       // Render at 144 DPI (2x 72dpi)
       const dpi = 144;
@@ -62,7 +82,6 @@ export class MupdfWorker {
       );
       const png = pix.asPNG();
       page.destroy();
-      doc.destroy();
 
       // Convert Uint8Array to base64 in chunks to avoid stack overflow
       const CHUNK_SIZE = 8192; // Process 8KB at a time
@@ -73,9 +92,8 @@ export class MupdfWorker {
       }
       const base64 = btoa(binary);
       return `data:image/png;base64,${base64}`;
-    } catch (error) {
-      console.error('Error rendering first page:', error);
-      throw new Error('Failed to render PDF preview');
+    } finally {
+      doc.destroy();
     }
   }
 }

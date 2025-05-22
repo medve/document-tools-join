@@ -8,6 +8,21 @@ export default defineConfig({
     ],
     worker: {
         format: "es",
+        plugins: function () { return [
+            {
+                name: 'mupdf-worker',
+                transform: function (code, id) {
+                    if (id.includes('mupdf')) {
+                        // Add global self reference and prevent document access
+                        code = "\n              const self = globalThis;\n              const window = self;\n              const document = undefined;\n              ".concat(code, "\n            ");
+                        return {
+                            code: code,
+                            map: null
+                        };
+                    }
+                }
+            }
+        ]; }
     },
     optimizeDeps: {
         exclude: ["mupdf"], // Exclude mupdf from pre-bundling
