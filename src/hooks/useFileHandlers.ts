@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0‑or‑later
+
 import { useCallback, useRef } from 'react';
 
 export interface FileItem {

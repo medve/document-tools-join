@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';

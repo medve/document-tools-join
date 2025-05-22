@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0
+
 import { Download } from "lucide-react";
 import React, { useRef, useEffect, useState } from "react";
 

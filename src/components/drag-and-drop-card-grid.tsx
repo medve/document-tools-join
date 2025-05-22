@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0
+
 import React from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {

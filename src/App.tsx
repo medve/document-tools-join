@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0
+
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

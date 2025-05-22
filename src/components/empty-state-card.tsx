@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRef } from "react";

@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0
+
 /// <reference lib="webworker" />
 import * as Comlink from 'comlink'
 import * as mupdf from "mupdf/mupdfjs"

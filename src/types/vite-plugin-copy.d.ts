@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0
+
 declare module 'vite-plugin-copy' {
   interface CopyTarget {
     src: string;

@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0‑or‑later
+
 import { cva } from "class-variance-authority"
 
 export const buttonVariants = cva(

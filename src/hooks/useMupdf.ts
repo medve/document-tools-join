@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0‑or‑later
+
 import { MUPDF_LOADED, type MupdfWorker } from "../workers/mupdf.worker";
 import * as Comlink from "comlink";
 import { Remote } from "comlink";
