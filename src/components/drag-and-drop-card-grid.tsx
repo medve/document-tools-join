@@ -36,6 +36,7 @@ interface DragAndDropCardGridProps {
   onDragEnter: (event: React.DragEvent<Element>) => void;
   onDragLeave: (event: React.DragEvent<Element>) => void;
   onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onRotate: (id: string) => void;
 }
 
 interface SortableCardProps {
@@ -43,6 +44,7 @@ interface SortableCardProps {
   name: string;
   preview: string | null;
   onDelete: (id: string) => void;
+  onRotate: (id: string) => void;
   listeners: SyntheticListenerMap | undefined;
   attributes: HTMLAttributes<Element>;
   setNodeRef: (element: HTMLElement | null) => void;
@@ -51,7 +53,7 @@ interface SortableCardProps {
   isDragging: boolean;
 }
 
-function SortableCard({ id, name, preview, onDelete, listeners, attributes, setNodeRef, transform, transition, isDragging }: SortableCardProps) {
+function SortableCard({ id, name, preview, onDelete, onRotate, listeners, attributes, setNodeRef, transform, transition, isDragging }: SortableCardProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -87,6 +89,19 @@ function SortableCard({ id, name, preview, onDelete, listeners, attributes, setN
         >
           <X className="h-4 w-4" />
         </button>
+        {/* Rotate button */}
+        <button
+          className="absolute top-2 left-2 w-7 h-7 bg-white dark:bg-[#101A26] rounded-full flex items-center justify-center z-10 shadow-sm p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none"
+          aria-label="Rotate"
+          onClick={e => { e.stopPropagation(); onRotate(id); }}
+          onPointerDown={e => e.stopPropagation()}
+          type="button"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 2V6H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
         <CardContent className="flex flex-col items-center justify-center px-2 pt-6 pb-3">
           <div className="rounded-lg mb-2 w-full h-[100px] flex items-center justify-center overflow-hidden p-2" style={{padding: '8px'}}>
             {preview ? (
@@ -116,9 +131,10 @@ function SortableCard({ id, name, preview, onDelete, listeners, attributes, setN
 interface SortableCardWrapperProps {
   item: CardItem;
   onDelete: (id: string) => void;
+  onRotate: (id: string) => void;
 }
 
-function SortableCardWrapper({ item, onDelete }: SortableCardWrapperProps) {
+function SortableCardWrapper({ item, onDelete, onRotate }: SortableCardWrapperProps) {
   const {
     attributes,
     listeners,
@@ -133,6 +149,7 @@ function SortableCardWrapper({ item, onDelete }: SortableCardWrapperProps) {
       name={item.name}
       preview={item.preview}
       onDelete={onDelete}
+      onRotate={onRotate}
       listeners={listeners}
       attributes={attributes}
       setNodeRef={setNodeRef}
@@ -143,7 +160,7 @@ function SortableCardWrapper({ item, onDelete }: SortableCardWrapperProps) {
   );
 }
 
-export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDragActive, isProcessing, onDrop, onDragOver, onDragEnter, onDragLeave, onFileSelect }: DragAndDropCardGridProps) {
+export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDragActive, isProcessing, onDrop, onDragOver, onDragEnter, onDragLeave, onFileSelect, onRotate }: DragAndDropCardGridProps) {
   const [internalItems, setInternalItems] = React.useState(items);
   const [dragActive, setDragActive] = React.useState(isDragActive);
 
@@ -198,7 +215,7 @@ export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDrag
             onFileSelect={onFileSelect}
           />
           {internalItems.map((item) => (
-            <SortableCardWrapper key={item.id} item={item} onDelete={onDelete} />
+            <SortableCardWrapper key={item.id} item={item} onDelete={onDelete} onRotate={onRotate} />
           ))}
         </div>
       </SortableContext>
