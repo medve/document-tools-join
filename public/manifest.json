@@ -26,5 +26,5 @@
     "default_locale": "en",
     "homepage_url": "https://github.com/your-user/your-extension",
     "author": "Anton Medvedev",
-    "license": "AGPL-3.0-or-later"
+    "license": "AGPL-3.0"
 }
