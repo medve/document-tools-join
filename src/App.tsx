@@ -180,7 +180,7 @@ const App: React.FC = () => {
             onFileSelect={handleFileInput}
           />
         ) : (
-          <div className="w-full max-w-screen-xl mx-auto flex-1 flex flex-col">
+          <div className="w-full max-w-screen-xl mx-auto flex-1 flex flex-col pb-32">
             <DragAndDropCardGrid
               items={files.map(item => ({
                 id: item.id,

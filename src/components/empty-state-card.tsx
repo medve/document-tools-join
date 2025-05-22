@@ -61,6 +61,21 @@ export function EmptyStateCard({
           />
         </Button>
       </div>
+      <div style={{ marginTop: 24 }} className="flex items-center justify-center w-full">
+        <img src="/icons/shield.svg" alt="Privacy ensured" className="w-5 h-5 mr-2" />
+        <span
+          className="text-black dark:text-white"
+          style={{
+            fontSize: 14,
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 400,
+            lineHeight: '15.4px',
+            wordWrap: 'break-word',
+          }}
+        >
+          Privacy ensured: no server uploads
+        </span>
+      </div>
     </div>
   );
 } 
