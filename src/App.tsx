@@ -12,8 +12,8 @@ import { usePdfProcessing } from './hooks/usePdfProcessing';
 import { AnimatedDownloadButton } from "@/components/animated-download-button";
 import { trackError, trackEvent } from '@/lib/amplitude';
 
-const CONTACT_EMAIL = "pt.kapibaradigitalservices@gmail.com";
-const GITHUB_URL = "https://github.com/medve/document-tools-join";
+const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL || "pt.kapibaradigitalservices@gmail.com";
+const GITHUB_URL = import.meta.env.VITE_GITHUB_URL || "https://github.com/medve/document-tools-join";
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -34,6 +34,13 @@ const App: React.FC = () => {
   const [isDownloadSuccess, setIsDownloadSuccess] = useState(false);
   const [isDownloadLoading, setIsDownloadLoading] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+
+  // Track app opened
+  useEffect(() => {
+    trackEvent('app_opened', {
+      version: import.meta.env.VITE_APP_VERSION
+    });
+  }, []);
 
   // File handlers
   const {
@@ -138,7 +145,6 @@ const App: React.FC = () => {
       handleClear();
       setMergedPdfUrl(null);
       setMergedPdfBlob(null);
-      trackEvent('files_cleared');
     } catch (error) {
       trackError(error instanceof Error ? error : new Error(String(error)), {
         context: 'pdf_state_clear'

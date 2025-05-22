@@ -1,6 +1,7 @@
 import react from "@vitejs/plugin-react";
 import { resolve } from 'path';
 import { defineConfig } from "vite";
+import type { Plugin } from 'vite';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -9,6 +10,26 @@ export default defineConfig({
   ],
   worker: {
     format: "es",
+    plugins: () => [
+      {
+        name: 'mupdf-worker',
+        transform(code, id) {
+          if (id.includes('mupdf')) {
+            // Add global self reference and prevent document access
+            code = `
+              const self = globalThis;
+              const window = self;
+              const document = undefined;
+              ${code}
+            `;
+            return {
+              code,
+              map: null
+            };
+          }
+        }
+      } as Plugin
+    ]
   },
   optimizeDeps: {
     exclude: ["mupdf"], // Exclude mupdf from pre-bundling

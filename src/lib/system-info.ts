@@ -1,7 +1,7 @@
 /// <reference types="chrome"/>
 
 export interface SystemInfo {
-  extension_version: string;
+  extension_version?: string;
   browser_locale: string;
   browser_name: string;
   browser_version: string;
@@ -9,22 +9,44 @@ export interface SystemInfo {
   os_version: string;
   screen_resolution: string;
   color_scheme: 'light' | 'dark';
+  is_extension: boolean;
 }
 
 export function getSystemInfo(): SystemInfo {
+  // Check if we're in a browser environment
+  const isBrowser = typeof window !== 'undefined' && typeof navigator !== 'undefined';
+  
+  if (!isBrowser) {
+    // Return default values for server-side
+    return {
+      browser_locale: 'en-US',
+      browser_name: 'Unknown',
+      browser_version: 'Unknown',
+      os_name: 'Unknown',
+      os_version: 'Unknown',
+      screen_resolution: '0x0',
+      color_scheme: 'light',
+      is_extension: false
+    };
+  }
+
   const userAgent = navigator.userAgent;
   const browserInfo = getBrowserInfo(userAgent);
   const osInfo = getOSInfo(userAgent);
+  const isExtension = typeof chrome !== 'undefined' && 
+    typeof chrome.runtime !== 'undefined' && 
+    typeof chrome.runtime.getManifest === 'function';
 
   return {
-    extension_version: chrome.runtime.getManifest().version,
+    extension_version: isExtension ? chrome.runtime.getManifest().version : undefined,
     browser_locale: navigator.language,
     browser_name: browserInfo.name,
     browser_version: browserInfo.version,
     os_name: osInfo.name,
     os_version: osInfo.version,
     screen_resolution: `${window.screen.width}x${window.screen.height}`,
-    color_scheme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    color_scheme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+    is_extension: isExtension
   };
 }
 
