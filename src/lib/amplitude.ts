@@ -48,22 +48,5 @@ export function trackError(error: Error | string, additionalProperties?: Record<
   });
 }
 
-// Set up global error handler only in browser context
-if (typeof window !== 'undefined') {
-  window.addEventListener('error', (event) => {
-    trackError(event.error || new Error(event.message), {
-      filename: event.filename,
-      lineno: event.lineno,
-      colno: event.colno
-    });
-  });
-
-  window.addEventListener('unhandledrejection', (event) => {
-    trackError(event.reason, {
-      type: 'unhandledrejection'
-    });
-  });
-}
-
 // Export amplitude instance for direct access if needed
 export { amplitude }; 
