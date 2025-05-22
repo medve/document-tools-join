@@ -141,11 +141,13 @@ const App: React.FC = () => {
       {/* Main grid area */}
       <main className="flex-1 flex items-start justify-center px-2 py-6 pt-24">
         {mergedPdfUrl ? (
-          <div className="fixed inset-0 flex items-center justify-center z-40">
-            <div className="bg-white dark:bg-[#182B47] rounded-2xl shadow-lg flex flex-col items-center px-8 py-10 gap-6 max-w-[600px] w-full">
-              <img src="/icons/thumbs-up.svg" alt="Merged!" className="w-10 h-10 mb-2" />
+          <div className="fixed inset-0 flex flex-col items-center justify-center z-40">
+            <div className="bg-white dark:bg-[#182B47] rounded-2xl shadow-lg flex flex-col items-center px-8 py-10 gap-0 max-w-[600px] w-full">
+              <img src="/icons/thumbs-up.svg" alt="Merged!" className="w-10 h-10 mb-0" />
+              <div style={{ height: 24 }} />
               <div className="font-gabarito text-2xl font-bold text-center text-[#0C1A2D] dark:text-white">PDFs have been merged!</div>
-              <div className="flex flex-row items-center gap-2 mt-6">
+              <div style={{ height: 24 }} />
+              <div className="flex flex-row items-center gap-2 mt-0">
                 <div className="w-full flex justify-center">
                   <div className="rounded-full bg-neutral-800 dark:bg-white text-white dark:text-gray-900">
                     <AnimatedDownloadButton
@@ -158,14 +160,14 @@ const App: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <Button
-                className="mt-4 w-full max-w-xs mx-auto bg-gray-100 dark:bg-gray-200 text-gray-900 dark:text-gray-900 hover:bg-gray-200 dark:hover:bg-gray-300"
-                onClick={clearPdfState}
-              >
-                <img src="/icons/arrow-left-circle.svg" alt="Back" className="w-5 h-5 mr-2" />
-                To main page
-              </Button>
             </div>
+            <Button
+              className="mt-6 w-full max-w-xs mx-auto bg-gray-100 dark:bg-gray-200 text-gray-900 dark:text-gray-900 hover:bg-gray-200 dark:hover:bg-gray-300 opacity-50"
+              onClick={clearPdfState}
+            >
+              <img src="/icons/arrow-left-circle.svg" alt="Back" className="w-5 h-5 mr-2" />
+              To main page
+            </Button>
           </div>
         ) : files.length === 0 ? (
           <EmptyStateCard
