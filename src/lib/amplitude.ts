@@ -1,4 +1,5 @@
 import * as amplitude from '@amplitude/analytics-browser';
+import { getSystemInfo } from './system-info';
 
 // Initialize Amplitude with your API key
 amplitude.init('820d9b1e90ed9b8f11d1c06c3624a270', {
@@ -9,9 +10,15 @@ amplitude.init('820d9b1e90ed9b8f11d1c06c3624a270', {
   }
 });
 
+// Get system information
+const systemInfo = getSystemInfo();
+
 // Export a function to track events
 export function trackEvent(eventName: string, eventProperties?: Record<string, unknown>) {
-  amplitude.track(eventName, eventProperties);
+  amplitude.track(eventName, {
+    ...systemInfo,
+    ...eventProperties
+  });
 }
 
 // Track errors with detailed information
