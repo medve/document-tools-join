@@ -55,7 +55,7 @@ const App: React.FC = () => {
   } = useFileHandlers({ setFiles, setPreviews, generateId });
 
   // PDF processing
-  const { isWorkerInitialized, generatePreviews, mergePdfs } = usePdfProcessing(files, previews, setPreviews);
+  const { isWorkerInitialized, generatePreviews, mergePdfs, rotateAndPreviewPdf } = usePdfProcessing(files, previews, setPreviews);
 
   // Dark mode effect
   useEffect(() => {
@@ -183,6 +183,23 @@ const App: React.FC = () => {
     }
   }
 
+  // Rotate handler for a single file
+  const handleRotate = useCallback(async (id: string) => {
+    const item = files.find(f => f.id === id);
+    if (!item) return;
+    setIsProcessing(true);
+    try {
+      const result = await rotateAndPreviewPdf(item);
+      if (!result) return;
+      setFiles(prev => prev.map(f => f.id === id ? { ...f, file: result.rotatedFile } : f));
+      setPreviews(prev => ({ ...prev, [id]: result.preview }));
+    } catch (e) {
+      alert('Failed to rotate PDF.');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [files, rotateAndPreviewPdf]);
+
   return (
     <div
       className={cn(
@@ -308,20 +325,17 @@ const App: React.FC = () => {
         ) : (
           <div className="w-full max-w-screen-xl mx-auto flex-1 flex flex-col pb-32">
             <DragAndDropCardGrid
-              items={files.map(item => ({
-                id: item.id,
-                name: cropFileName(item.file.name),
-                preview: previews[item.id] || null,
-              }))}
+              items={files.map(f => ({ id: f.id, name: cropFileName(f.file.name), preview: previews[f.id] }))}
               onDelete={handleDelete}
               onReorder={handleReorder}
               isDragActive={isDragActive}
               isProcessing={isProcessing}
-              onDrop={e => handleDrop(e, setIsDragActive)}
+              onDrop={(e) => handleDrop(e, setIsDragActive)}
               onDragOver={handleDragOver}
-              onDragEnter={e => handleDragEnter(e, setIsDragActive)}
-              onDragLeave={e => handleDragLeave(e, setIsDragActive)}
+              onDragEnter={(e) => handleDragEnter(e, setIsDragActive)}
+              onDragLeave={(e) => handleDragLeave(e, setIsDragActive)}
               onFileSelect={handleFileInput}
+              onRotate={handleRotate}
             />
           </div>
         )}
