@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0‑or‑later
+
 import { MUPDF_LOADED, type MupdfWorker } from "../workers/mupdf.worker";
 import * as Comlink from "comlink";
 import { Remote } from "comlink";
@@ -36,10 +39,15 @@ export function useMupdf() {
     return mupdfWorker.current!.renderFirstPage(pdfBuffer);
   }
 
+  const rotateDocument = async (pdfBuffer: ArrayBuffer) => {
+    return mupdfWorker.current!.rotateDocument(pdfBuffer);
+  }
+
   return {
     isWorkerInitialized,
     mergeDocuments,
     renderFirstPage,
+    rotateDocument,
   }
 }
 

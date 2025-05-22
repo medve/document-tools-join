@@ -73,4 +73,15 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.font-gabarito {
+  font-family: 'Gabarito', sans-serif;
+}
+
+.logo-text {
+  color: #1A1C20;
+}
+.dark .logo-text {
+  color: #fff;
 } 

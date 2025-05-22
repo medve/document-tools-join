@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0
+
 /// <reference lib="webworker" />
 import * as Comlink from 'comlink'
 import * as mupdf from "mupdf/mupdfjs"
@@ -29,10 +32,10 @@ export class MupdfWorker {
       }
       
       const mergedDocument = await mergedDoc.saveToBuffer(
-        "compress-images,compression-effort=90,image_dpi=70,image_quality=40," +
-        "compress-fonts,garbage=4,color-lossy-image-subsample-dpi=70,"+
+        "compress-images,compression-effort=90,image_dpi=150,image_quality=70," +
+        "compress-fonts,garbage=4,color-lossy-image-subsample-dpi=150,"+
         "color-lossy-image-recompress-method=jpeg,"+
-        "color-lossy-image-recompress-quality=40,",
+        "color-lossy-image-recompress-quality=70,",
       );
       mergedDoc.destroy();
       
@@ -73,6 +76,29 @@ export class MupdfWorker {
     } catch (error) {
       console.error('Error rendering first page:', error);
       throw new Error('Failed to render PDF preview');
+    }
+  }
+
+  async rotateDocument(pdfBuffer: ArrayBuffer): Promise<ArrayBuffer> {
+    try {
+      const doc = mupdf.PDFDocument.openDocument(pdfBuffer, 'application/pdf');
+      const pageCount = doc.countPages();
+      for (let i = 0; i < pageCount; i++) {
+        const page = doc.loadPage(i);
+        page.rotate(90); // rotate 90 degrees to the right (clockwise)
+        page.destroy();
+      }
+      const rotatedBuffer = await doc.saveToBuffer(
+        "compress-images,compression-effort=90,image_dpi=150,image_quality=70," +
+        "compress-fonts,garbage=4,color-lossy-image-subsample-dpi=150,"+
+        "color-lossy-image-recompress-method=jpeg,"+
+        "color-lossy-image-recompress-quality=70,",
+      );
+      doc.destroy();
+      return rotatedBuffer.asUint8Array();
+    } catch (error) {
+      console.error('Error rotating document:', error);
+      throw new Error('Failed to rotate document');
     }
   }
 }

@@ -1,3 +1,6 @@
+// Copyright © 2025 Anton Medvedev
+// SPDX‑License‑Identifier: AGPL‑3.0
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRef } from "react";
@@ -60,6 +63,21 @@ export function EmptyStateCard({
             className="hidden"
           />
         </Button>
+      </div>
+      <div style={{ marginTop: 24 }} className="flex items-center justify-center w-full">
+        <img src="/icons/shield.svg" alt="Privacy ensured" className="w-5 h-5 mr-2" />
+        <span
+          className="text-black dark:text-white"
+          style={{
+            fontSize: 14,
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 400,
+            lineHeight: '15.4px',
+            wordWrap: 'break-word',
+          }}
+        >
+          Privacy ensured: no server uploads
+        </span>
       </div>
     </div>
   );
