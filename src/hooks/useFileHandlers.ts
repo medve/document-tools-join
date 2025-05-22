@@ -2,7 +2,7 @@
 // SPDX‑License‑Identifier: AGPL‑3.0‑or‑later
 
 import { useCallback, useRef } from 'react';
-import { trackError } from '@/lib/amplitude';
+import { trackError, trackEvent } from '@/lib/amplitude';
 
 export interface FileItem {
   id: string;
@@ -35,6 +35,12 @@ export function useFileHandlers({ setFiles, setPreviews, generateId }: UseFileHa
             next[item.id] = null;
           });
           return next;
+        });
+        trackEvent('files_added', {
+          method: 'drop',
+          count: newFileItems.length,
+          names: newFileItems.map(f => f.file.name),
+          sizes: newFileItems.map(f => f.file.size)
         });
       }
     } catch (error) {
@@ -95,6 +101,12 @@ export function useFileHandlers({ setFiles, setPreviews, generateId }: UseFileHa
           });
           return next;
         });
+        trackEvent('files_added', {
+          method: 'input',
+          count: newFileItems.length,
+          names: newFileItems.map(f => f.file.name),
+          sizes: newFileItems.map(f => f.file.size)
+        });
       }
       event.target.value = '';
     } catch (error) {
@@ -125,6 +137,7 @@ export function useFileHandlers({ setFiles, setPreviews, generateId }: UseFileHa
     try {
       setFiles([]);
       setPreviews({});
+      trackEvent('files_cleared');
     } catch (error) {
       trackError(error instanceof Error ? error : new Error(String(error)), {
         context: 'file_clear_handler'

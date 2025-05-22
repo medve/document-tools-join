@@ -10,7 +10,7 @@ import '@/styles/empty-state.css';
 import { useFileHandlers } from './hooks/useFileHandlers';
 import { usePdfProcessing } from './hooks/usePdfProcessing';
 import { AnimatedDownloadButton } from "@/components/animated-download-button";
-import { trackError } from '@/lib/amplitude';
+import { trackError, trackEvent } from '@/lib/amplitude';
 
 const CONTACT_EMAIL = "pt.kapibaradigitalservices@gmail.com";
 const GITHUB_URL = "https://github.com/medve/document-tools-join";
@@ -85,6 +85,12 @@ const App: React.FC = () => {
       const url = URL.createObjectURL(blob);
       setMergedPdfUrl(url);
       setMergedPdfBlob(blob);
+      trackEvent('files_joined', {
+        count: files.length,
+        names: files.map(f => f.file.name),
+        sizes: files.map(f => f.file.size),
+        resultSize: blob.size
+      });
     } catch (error) {
       trackError(error instanceof Error ? error : new Error(String(error)), {
         context: 'pdf_merge_handler',
@@ -94,7 +100,7 @@ const App: React.FC = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [mergePdfs, isProcessing, files.length]);
+  }, [mergePdfs, isProcessing, files]);
 
   // Reorder handler
   const handleReorder = useCallback((newItems: {id: string}[]) => {
@@ -132,6 +138,7 @@ const App: React.FC = () => {
       handleClear();
       setMergedPdfUrl(null);
       setMergedPdfBlob(null);
+      trackEvent('files_cleared');
     } catch (error) {
       trackError(error instanceof Error ? error : new Error(String(error)), {
         context: 'pdf_state_clear'
@@ -155,6 +162,10 @@ const App: React.FC = () => {
       document.body.removeChild(link);
       setIsDownloadSuccess(true);
       setTimeout(() => setIsDownloadSuccess(false), 1800);
+      trackEvent('file_downloaded', {
+        size: mergedPdfBlob.size,
+        url: url
+      });
     } catch (error) {
       trackError(error instanceof Error ? error : new Error(String(error)), {
         context: 'pdf_download_handler',
