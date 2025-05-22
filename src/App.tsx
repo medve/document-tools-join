@@ -11,6 +11,9 @@ import { useFileHandlers } from './hooks/useFileHandlers';
 import { usePdfProcessing } from './hooks/usePdfProcessing';
 import { AnimatedDownloadButton } from "@/components/animated-download-button";
 
+const CONTACT_EMAIL = "pt.kapibaradigitalservices@gmail.com";
+const GITHUB_URL = "https://github.com/medve/document-tools-join";
+
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
@@ -29,6 +32,7 @@ const App: React.FC = () => {
   const [mergedPdfBlob, setMergedPdfBlob] = useState<Blob | null>(null);
   const [isDownloadSuccess, setIsDownloadSuccess] = useState(false);
   const [isDownloadLoading, setIsDownloadLoading] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
 
   // File handlers
   const {
@@ -138,9 +142,71 @@ const App: React.FC = () => {
           onClick={clearPdfState}
         >
           <img src="/icons/app-icon.svg" alt="PDF joiner logo" className="h-8 w-8" />
-          <span className="font-gabarito font-semibold text-lg md:text-xl text-gray-900 dark:text-white tracking-tight" style={{letterSpacing: '-1px', lineHeight: '0.9', fontFamily: 'Gabarito, sans-serif'}}>PDF joiner</span>
+          <span
+            style={{
+              fontSize: 24,
+              fontFamily: 'Gabarito',
+              fontWeight: 600,
+              lineHeight: '21.6px',
+              wordWrap: 'break-word',
+            }}
+            className="logo-text"
+          >
+            PDF joiner
+          </span>
         </div>
+        <button
+          type="button"
+          onClick={() => setIsContactOpen(true)}
+          style={{
+            color: '#999999',
+            fontSize: 16,
+            fontFamily: 'Gabarito',
+            fontWeight: 500,
+            lineHeight: '14.4px',
+            wordWrap: 'break-word',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            letterSpacing: 0,
+          }}
+        >
+          Contact us
+        </button>
       </header>
+      {/* Contact Modal */}
+      {isContactOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={() => setIsContactOpen(false)}>
+          <div
+            className="bg-white rounded-xl shadow-lg p-8 flex flex-col items-center relative"
+            style={{ maxWidth: '30rem', width: '130%', minWidth: 320 }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+              onClick={() => setIsContactOpen(false)}
+              aria-label="Close"
+              style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}
+            >
+              ×
+            </button>
+            <div className="font-gabarito text-lg font-semibold mb-2" style={{ color: '#000' }}>Contact us</div>
+            <div className="text-base mb-4 text-center break-all" style={{ color: '#000' }}>
+              <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: '#000', textDecoration: 'none' }}>{CONTACT_EMAIL}</a>
+            </div>
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-base font-medium"
+              style={{ fontFamily: 'Gabarito', color: '#000', textDecoration: 'none', textAlign: 'center' }}
+            >
+              GitHub
+            </a>
+          </div>
+        </div>
+      )}
       {/* Main grid area */}
       <main className="flex-1 flex items-start justify-center px-2 py-6 pt-24">
         {mergedPdfUrl ? (
