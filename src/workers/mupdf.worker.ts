@@ -4,6 +4,7 @@
 /// <reference lib="webworker" />
 import * as Comlink from 'comlink'
 import * as mupdf from "mupdf/mupdfjs"
+import { trackError } from '@/lib/amplitude';
 
 export const MUPDF_LOADED = 'MUPDF_LOADED'
 
@@ -17,7 +18,10 @@ export class MupdfWorker {
     try {
       postMessage(MUPDF_LOADED);
     } catch (error) {
-      console.error("Failed to initialize MuPDF:", error);
+      trackError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'mupdf_initialization'
+      });
+      throw error;
     }
   }
 
@@ -41,7 +45,11 @@ export class MupdfWorker {
       
       return mergedDocument.asUint8Array();
     } catch (error) {
-      console.error('Error loading document:', error)
+      trackError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'mupdf_merge_documents',
+        documentCount: documents.length,
+        firstDocumentSize: documents[0]?.byteLength
+      });
       throw new Error('Failed to load document')
     }
   }
@@ -74,7 +82,10 @@ export class MupdfWorker {
       const base64 = btoa(binary);
       return `data:image/png;base64,${base64}`;
     } catch (error) {
-      console.error('Error rendering first page:', error);
+      trackError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'mupdf_render_first_page',
+        bufferSize: pdfBuffer.byteLength
+      });
       throw new Error('Failed to render PDF preview');
     }
   }

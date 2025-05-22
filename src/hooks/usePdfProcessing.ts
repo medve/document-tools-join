@@ -4,6 +4,7 @@
 import { useCallback } from 'react';
 import { useMupdf } from './useMupdf';
 import type { FileItem } from './useFileHandlers';
+import { trackError } from '@/lib/amplitude';
 
 export function usePdfProcessing(
   files: FileItem[],
@@ -24,7 +25,12 @@ export function usePdfProcessing(
           const buffer = await item.file.arrayBuffer();
           const preview = await renderFirstPage(buffer);
           newEntries[item.id] = preview;
-        } catch {
+        } catch (error) {
+          trackError(error instanceof Error ? error : new Error(String(error)), {
+            context: 'pdf_preview_generation',
+            fileName: item.file.name,
+            fileSize: item.file.size
+          });
           newEntries[item.id] = null;
         }
       })
@@ -37,8 +43,17 @@ export function usePdfProcessing(
 
   // Merge PDFs
   const mergePdfs = useCallback(async () => {
-    const fileBuffers = await Promise.all(files.map(item => item.file.arrayBuffer()));
-    return mergeDocuments(fileBuffers);
+    try {
+      const fileBuffers = await Promise.all(files.map(item => item.file.arrayBuffer()));
+      return await mergeDocuments(fileBuffers);
+    } catch (error) {
+      trackError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'pdf_merge',
+        fileCount: files.length,
+        fileNames: files.map(f => f.file.name)
+      });
+      throw error;
+    }
   }, [files, mergeDocuments]);
 
   return {
