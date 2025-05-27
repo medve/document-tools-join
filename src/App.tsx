@@ -12,7 +12,7 @@ import { usePdfProcessing } from './hooks/usePdfProcessing';
 import { AnimatedDownloadButton } from "@/components/animated-download-button";
 import { trackError, trackEvent } from '@/lib/amplitude';
 
-const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL || "pt.kapibaradigitalservices@gmail.com";
+const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL || "antonmedve@gmail.com";
 const GITHUB_URL = import.meta.env.VITE_GITHUB_URL || "https://github.com/medve/document-tools-join";
 
 function generateId() {
