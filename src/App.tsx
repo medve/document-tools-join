@@ -11,6 +11,7 @@ import { useFileHandlers } from './hooks/useFileHandlers';
 import { usePdfProcessing } from './hooks/usePdfProcessing';
 import { AnimatedDownloadButton } from "@/components/animated-download-button";
 import { trackError, trackEvent } from '@/lib/amplitude';
+import { RatingWidget } from "@/components/rating-widget";
 
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL || "antonmedve@gmail.com";
 const GITHUB_URL = import.meta.env.VITE_GITHUB_URL || "https://github.com/medve/document-tools-join";
@@ -284,9 +285,10 @@ const App: React.FC = () => {
                   </div>
                 </div>
               </div>
+              <RatingWidget className="mt-6" />
             </div>
             <Button
-              className="mt-6 w-full max-w-xs mx-auto bg-gray-100 dark:bg-gray-200 text-gray-900 dark:text-gray-900 hover:bg-gray-200 dark:hover:bg-gray-300 opacity-50"
+              className="mt-6 w-full max-w-xs mx-auto bg-gray-100 dark:bg-gray-200/30 text-gray-900 dark:text-gray-900 hover:bg-gray-200 dark:hover:bg-gray-200/70 opacity-70"
               onClick={clearPdfState}
             >
               <img src="/icons/arrow-left-circle.svg" alt="Back" className="w-5 h-5 mr-2" />

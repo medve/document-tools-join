@@ -3,7 +3,7 @@ import { getSystemInfo } from './system-info';
 
 // Initialize Amplitude only in browser context
 if (typeof window !== 'undefined') {
-  amplitude.init(import.meta.env.VITE_AMPLITUDE_API_KEY || '820d9b1e90ed9b8f11d1c06c3624a270', {
+  amplitude.init(import.meta.env.VITE_AMPLITUDE_API_KEY, {
     identityStorage: 'localStorage', 
     defaultTracking: {  
       sessions: true, 
