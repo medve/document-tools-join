@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "__MSG_appName__",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "__MSG_shortDesc__",
     "background": {
       "service_worker": "background.js"
@@ -20,7 +20,7 @@
       "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
     },
     "default_locale": "en",
-    "homepage_url": "https://github.com/your-user/your-extension",
+    "homepage_url": "https://github.com/medve/document-tools-join",
     "author": "Anton Medvedev",
     "host_permissions": ["https://*.amplitude.com/"]
 }
