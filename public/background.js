@@ -7,3 +7,6 @@ chrome.runtime.onInstalled.addListener((details) => {
     chrome.tabs.create({ url: "https://pdfjoiner.app/welcome" });
   }
 });
+
+const UNINSTALL_URL = "https://pdfjoiner.app/uninstall";
+chrome.runtime.setUninstallURL(UNINSTALL_URL);
