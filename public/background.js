@@ -1,17 +1,5 @@
-/** @type {{ deviceId?: string; sessionId?: string } | undefined} */
-let cachedAmpIds;
-
-chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.type === 'AMP_IDS') cachedAmpIds = msg;
-});
-
 chrome.action.onClicked.addListener(() => {
-  const base = chrome.runtime.getURL('index.html');
-
-  const url = cachedAmpIds
-    ? `${base}?ampDeviceId=${encodeURIComponent(cachedAmpIds.deviceId)}&ampSessionId=${cachedAmpIds.sessionId}`
-    : base;                       // fallback if we never got the IDs
-
+  const url = chrome.runtime.getURL('index.html');
   chrome.tabs.create({ url });
 });
 

@@ -97,10 +97,7 @@ function SortableCard({ id, name, preview, onDelete, onRotate, listeners, attrib
           onPointerDown={e => e.stopPropagation()}
           type="button"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 2V6H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <img src="/icons/rotate-cw.svg" alt="Rotate" className="w-4 h-4" />
         </button>
         <CardContent className="flex flex-col items-center justify-center px-2 pt-6 pb-3">
           <div className="rounded-lg mb-2 w-full h-[100px] flex items-center justify-center overflow-hidden p-2" style={{padding: '8px'}}>
