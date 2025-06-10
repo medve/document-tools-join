@@ -22,5 +22,5 @@
     "default_locale": "en",
     "homepage_url": "https://github.com/medve/document-tools-join",
     "author": "Anton Medvedev",
-    "host_permissions": ["https://*.amplitude.com/"]
+    "host_permissions": ["https://*.amplitude.com/", "https://pdfjoiner.app/*"]
 }
