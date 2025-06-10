@@ -7,6 +7,10 @@ import * as mupdf from "mupdf/mupdfjs"
 
 export const MUPDF_LOADED = 'MUPDF_LOADED'
 const OPEN_DOCUMENT_TIMEOUT = 10000; // 10 seconds timeout
+const COMPRESSION_OPTIONS = "compress-images,compression-effort=90,image_dpi=150,image_quality=70," +
+  "compress-fonts,garbage=4,color-lossy-image-subsample-dpi=150,"+
+  "color-lossy-image-recompress-method=jpeg,"+
+  "color-lossy-image-recompress-quality=70,";
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -44,22 +48,24 @@ export class MupdfWorker {
   }
 
   async mergeDocuments(documents: ArrayBuffer[]): Promise<ArrayBuffer> {
-    if (documents.length === 0) throw new Error('No documents to merge')
+    if (documents.length === 0) throw new Error('No documents to merge');
 
-    const mergedDoc = await this.openDocumentWithTimeout(documents[0]);
+    // Create a new blank document
+    const mergedDoc = mupdf.PDFDocument.createBlankDocument();
     try {
-      for (const buf of documents.slice(1)) {
+      for (const buf of documents) {
         const src = await this.openDocumentWithTimeout(buf);
-        mergedDoc.merge(src) // defaults: fromPage=0, toPage=-1, startAt=-1, rotate=0
+        const pageCount = src.countPages();
+        for (let i = 0; i < pageCount; i++) {
+          mergedDoc.graftPage(-1, src, i); // Append each page preserving size/orientation
+        }
         src.destroy();
       }
-      
-      const mergedDocument = await mergedDoc.saveToBuffer(
-        "compress-images,compression-effort=90,image_dpi=70,image_quality=40," +
-        "compress-fonts,garbage=4,color-lossy-image-subsample-dpi=70,"+
-        "color-lossy-image-recompress-method=jpeg,"+
-        "color-lossy-image-recompress-quality=40,",
-      );
+      // Remove the initial blank page if present
+      if (mergedDoc.countPages() > 0 && mergedDoc.loadPage(0).getText().trim() === "") {
+        mergedDoc.deletePage(0);
+      }
+      const mergedDocument = await mergedDoc.saveToBuffer(COMPRESSION_OPTIONS);
       return mergedDocument.asUint8Array();
     } finally {
       mergedDoc.destroy();
@@ -94,6 +100,24 @@ export class MupdfWorker {
       return `data:image/png;base64,${base64}`;
     } finally {
       doc.destroy();
+    }
+  }
+
+  async rotateDocument(pdfBuffer: ArrayBuffer): Promise<ArrayBuffer> {
+    try {
+      const doc = mupdf.PDFDocument.openDocument(pdfBuffer, 'application/pdf');
+      const pageCount = doc.countPages();
+      for (let i = 0; i < pageCount; i++) {
+        const page = doc.loadPage(i);
+        page.rotate(90); // rotate 90 degrees to the right (clockwise)
+        page.destroy();
+      }
+      const rotatedBuffer = await doc.saveToBuffer(COMPRESSION_OPTIONS);
+      doc.destroy();
+      return rotatedBuffer.asUint8Array();
+    } catch (error) {
+      console.error('Error rotating document:', error);
+      throw new Error('Failed to rotate document');
     }
   }
 }

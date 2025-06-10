@@ -10,7 +10,7 @@ export function usePdfProcessing(
   previews: Record<string, string | null>,
   setPreviews: React.Dispatch<React.SetStateAction<Record<string, string | null>>>
 ) {
-  const { mergeDocuments, renderFirstPage, isWorkerInitialized } = useMupdf();
+  const { mergeDocuments, renderFirstPage, isWorkerInitialized, rotateDocument } = useMupdf();
 
   // Generate previews for new files only
   const generatePreviews = useCallback(async () => {
@@ -41,9 +41,20 @@ export function usePdfProcessing(
     return await mergeDocuments(fileBuffers);
   }, [files, mergeDocuments]);
 
+  // Rotate a PDF and update preview
+  const rotateAndPreviewPdf = useCallback(async (item: FileItem) => {
+    if (!isWorkerInitialized) return;
+    const buffer = await item.file.arrayBuffer();
+    const rotatedBuffer = await rotateDocument(buffer);
+    const rotatedFile = new File([rotatedBuffer], item.file.name, { type: 'application/pdf' });
+    const preview = await renderFirstPage(rotatedBuffer);
+    return { rotatedFile, preview };
+  }, [isWorkerInitialized, rotateDocument, renderFirstPage]);
+
   return {
     isWorkerInitialized,
     generatePreviews,
     mergePdfs,
+    rotateAndPreviewPdf,
   };
 } 

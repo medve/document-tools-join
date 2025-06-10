@@ -1,15 +1,23 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/amplitude";
 
 interface RatingWidgetProps {
   className?: string;
 }
 
-const FEEDBACK_FORM_URL = import.meta.env.VITE_FEEDBACK_FORM_URL || "https://docs.google.com/forms/d/e/1FAIpQLSeAxTa4UzxyfLXJ8WacWq8K4IXYa3sTiFBKtRrS_U3DnAeORw/viewform";
-const CHROME_STORE_URL = import.meta.env.VITE_CHROME_STORE_URL || "https://chromewebstore.google.com/detail/pdf-joiner/deadjnaenmndpdpakgchpbedlcdmmoai/reviews";
+const FEEDBACK_FORM_URL = import.meta.env.VITE_FEEDBACK_FORM_URL || "http://localhost:8000/uninstall";
+const CHROME_STORE_URL = import.meta.env.VITE_CHROME_STORE_URL || "http://localhost:8000/chrome";
 
 export function RatingWidget({ className }: RatingWidgetProps) {
+  const handleRatingClick = (rating: number) => {
+    trackEvent('rating_set', {
+      rating,
+      destination: rating <= 3 ? 'feedback_form' : 'chrome_store'
+    });
+  };
+
   return (
     <div className={cn("w-full", className)}>
       <hr className="border-0 border-t border-border/25 my-4" />
@@ -43,6 +51,7 @@ export function RatingWidget({ className }: RatingWidgetProps) {
                   href={rating <= 3 ? FEEDBACK_FORM_URL : CHROME_STORE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => handleRatingClick(rating)}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

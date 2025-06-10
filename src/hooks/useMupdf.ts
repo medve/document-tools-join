@@ -38,10 +38,15 @@ export function useMupdf() {
     return await mupdfWorker.current!.renderFirstPage(pdfBuffer);
   }
 
+  const rotateDocument = async (pdfBuffer: ArrayBuffer) => {
+    return mupdfWorker.current!.rotateDocument(pdfBuffer);
+  }
+
   return {
     isWorkerInitialized,
     mergeDocuments,
     renderFirstPage,
+    rotateDocument,
   }
 }
 
