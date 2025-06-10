@@ -105,6 +105,7 @@ const App: React.FC = () => {
         fileCount: files.length
       });
       alert('Failed to merge PDFs. Please try again.');
+      console.error(error);
     } finally {
       setIsProcessing(false);
     }
@@ -193,8 +194,9 @@ const App: React.FC = () => {
       if (!result) return;
       setFiles(prev => prev.map(f => f.id === id ? { ...f, file: result.rotatedFile } : f));
       setPreviews(prev => ({ ...prev, [id]: result.preview }));
-    } catch (e) {
+    } catch (error) {
       alert('Failed to rotate PDF.');
+      console.error(error);
     } finally {
       setIsProcessing(false);
     }
