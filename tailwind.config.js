@@ -49,8 +49,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-        gabarito: ["Gabarito", "sans-serif"],
+        sans: ["Gabarito", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",

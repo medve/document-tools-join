@@ -497,6 +497,11 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.9.tgz#50dea3616bc8191fb8e112283b49eaff03e78429"
   integrity sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==
 
+"@fontsource/gabarito@^5.2.6":
+  version "5.2.6"
+  resolved "https://registry.yarnpkg.com/@fontsource/gabarito/-/gabarito-5.2.6.tgz#3e274dbfdd35bdd52bc11ca954940cb9455b205f"
+  integrity sha512-FyC+UVMPKeS+r95G4JuL9+/gHXUpo5EgUss6Z1PnBTH6LZPkaY3TAZzad7VDAxdeKJlfAkfzHFwF5rGReabvKg==
+
 "@hello-pangea/dnd@^18.0.1":
   version "18.0.1"
   resolved "https://registry.npmjs.org/@hello-pangea/dnd/-/dnd-18.0.1.tgz"
