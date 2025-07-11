@@ -8,7 +8,7 @@ import * as mupdf from "mupdf/mupdfjs"
 export const MUPDF_LOADED = 'MUPDF_LOADED'
 const OPEN_DOCUMENT_TIMEOUT = 10000; // 10 seconds timeout
 const COMPRESSION_OPTIONS = "compress-images,compression-effort=90,image_dpi=150,image_quality=70," +
-  "compress-fonts,garbage=4,color-lossy-image-subsample-dpi=150,"+
+  "compress-fonts,garbage=2,color-lossy-image-subsample-dpi=150,"+
   "color-lossy-image-recompress-method=jpeg,"+
   "color-lossy-image-recompress-quality=70,";
 
@@ -37,7 +37,10 @@ export class MupdfWorker {
   }
 
   private async initializeMupdf() {
-      postMessage(MUPDF_LOADED);
+      // Only send postMessage in actual worker environment, not in tests
+      if (typeof WorkerGlobalScope !== 'undefined' && typeof importScripts === 'function') {
+        postMessage(MUPDF_LOADED);
+      }
   }
 
   private async openDocumentWithTimeout(buffer: ArrayBuffer): Promise<mupdf.PDFDocument> {
@@ -50,21 +53,191 @@ export class MupdfWorker {
   async mergeDocuments(documents: ArrayBuffer[]): Promise<ArrayBuffer> {
     if (documents.length === 0) throw new Error('No documents to merge');
 
-    // Create a new blank document
+    // Use hybrid approach to avoid page tree corruption while preserving links
     const mergedDoc = mupdf.PDFDocument.createBlankDocument();
+    
+    // Track page mappings for internal link remapping
+    interface PageMapping {
+      docIndex: number;
+      originalPageIndex: number;
+      newPageIndex: number;
+    }
+    const pageMappings: PageMapping[] = [];
+    
+    // Collect internal links to process after all pages are grafted
+    interface InternalLink {
+      newPageIndex: number;
+      bounds: number[];
+      originalURI: string;
+      originalPageRef: number;
+    }
+    const internalLinks: InternalLink[] = [];
+    
     try {
-      for (const buf of documents) {
+      for (let docIndex = 0; docIndex < documents.length; docIndex++) {
+        const buf = documents[docIndex];
         const src = await this.openDocumentWithTimeout(buf);
         const pageCount = src.countPages();
+        
         for (let i = 0; i < pageCount; i++) {
-          mergedDoc.graftPage(-1, src, i); // Append each page preserving size/orientation
+          // Graft the page content (preserves page dimensions and content)
+          mergedDoc.graftPage(-1, src, i);
+          
+          // Get the destination page (last added page)
+          const dstPageIndex = mergedDoc.countPages() - 1;
+          
+          // Record page mapping for internal link remapping
+          pageMappings.push({
+            docIndex,
+            originalPageIndex: i,
+            newPageIndex: dstPageIndex
+          });
+          
+          const srcPage = src.loadPage(i);
+          const dstPage = mergedDoc.loadPage(dstPageIndex);
+          
+          // Process links: copy external links immediately, collect internal links for later
+          try {
+            const links = srcPage.getLinks();
+            for (const link of links) {
+              if (link.isExternal()) {
+                // Copy external links (URLs) immediately
+                const bounds = link.getBounds();
+                dstPage.insertLink({
+                  x: bounds[0],
+                  y: bounds[1], 
+                  width: bounds[2] - bounds[0],
+                  height: bounds[3] - bounds[1]
+                }, link.getURI());
+              } else {
+                // Collect internal links for remapping after all pages are grafted
+                const uri = link.getURI();
+                if (uri && uri.includes('#page=')) {
+                  const pageMatch = uri.match(/#page=(\d+)/);
+                  if (pageMatch) {
+                    const originalPageRef = parseInt(pageMatch[1]);
+                    internalLinks.push({
+                      newPageIndex: dstPageIndex,
+                      bounds: link.getBounds(),
+                      originalURI: uri,
+                      originalPageRef: originalPageRef
+                    });
+                  }
+                }
+              }
+            }
+            
+            // Copy non-link annotations (preserves forms and other annotations)
+            // Internal links will be handled separately after all pages are grafted
+            const srcPageObj = srcPage.getObject();
+            const dstPageObj = dstPage.getObject();
+            
+            if (srcPageObj && dstPageObj) {
+              const annots = srcPageObj.get('Annots');
+              if (annots && annots.isArray() && annots.length > 0) {
+                // Filter out link annotations but keep forms, widgets, etc.
+                const filteredAnnots = mergedDoc.newArray();
+                let hasNonLinkAnnotations = false;
+                
+                for (let j = 0; j < annots.length; j++) {
+                  try {
+                    const annotRef = annots.get(j);
+                    if (annotRef && annotRef.isIndirect()) {
+                      const annot = annotRef.resolve();
+                      if (annot && annot.isDictionary()) {
+                        const subtype = annot.get('Subtype');
+                        // Skip link annotations, keep everything else
+                        if (!subtype || !subtype.isName() || subtype.asName() !== 'Link') {
+                          const graftedAnnot = mergedDoc.graftObject(annotRef);
+                          filteredAnnots.push(graftedAnnot);
+                          hasNonLinkAnnotations = true;
+                        }
+                      }
+                    }
+                  } catch (e) {
+                    // If we can't process this annotation, skip it
+                    console.warn(`Failed to process annotation ${j}:`, e);
+                  }
+                }
+                
+                // Only set annotations if we found non-link annotations
+                if (hasNonLinkAnnotations) {
+                  dstPageObj.put('Annots', filteredAnnots);
+                }
+              }
+            }
+          } catch (e) {
+            // Continue if copying fails for a specific page
+            console.warn(`Failed to copy annotations/links for page ${i}:`, e);
+          }
+          
+          srcPage.destroy();
+          dstPage.destroy();
         }
+        
         src.destroy();
       }
-      // Remove the initial blank page if present
-      if (mergedDoc.countPages() > 0 && mergedDoc.loadPage(0).getText().trim() === "") {
-        mergedDoc.deletePage(0);
+      
+      // Now process collected internal links with proper page remapping
+      console.log(`Processing ${internalLinks.length} internal links for remapping...`);
+      
+      for (const internalLink of internalLinks) {
+        try {
+          // Find the correct remapped page number
+          // Internal links reference pages within the same document they originated from
+          const sourceMapping = pageMappings.find(mapping => 
+            mapping.newPageIndex === internalLink.newPageIndex
+          );
+          
+          if (sourceMapping) {
+            // Find the target page in the same source document
+            const targetMapping = pageMappings.find(mapping => 
+              mapping.docIndex === sourceMapping.docIndex && 
+              mapping.originalPageIndex === internalLink.originalPageRef - 1 // PDF pages are 1-indexed in URIs
+            );
+            
+            if (targetMapping) {
+              // Create remapped URI with new page number (convert back to 1-indexed)
+              const newPageRef = targetMapping.newPageIndex + 1;
+              const newURI = internalLink.originalURI.replace(
+                /#page=\d+/,
+                `#page=${newPageRef}`
+              );
+              
+              // Add the remapped internal link to the destination page
+              const dstPage = mergedDoc.loadPage(internalLink.newPageIndex);
+              dstPage.insertLink({
+                x: internalLink.bounds[0],
+                y: internalLink.bounds[1],
+                width: internalLink.bounds[2] - internalLink.bounds[0],
+                height: internalLink.bounds[3] - internalLink.bounds[1]
+              }, newURI);
+              
+              dstPage.destroy();
+              
+              console.log(`Remapped internal link: ${internalLink.originalURI} → ${newURI}`);
+            } else {
+              console.warn(`Could not find target page mapping for internal link: ${internalLink.originalURI}`);
+            }
+          }
+        } catch (e) {
+          console.warn(`Failed to remap internal link: ${internalLink.originalURI}`, e);
+        }
       }
+      
+      // Remove the initial blank page if present
+      if (mergedDoc.countPages() > 0) {
+        try {
+          const firstPage = mergedDoc.loadPage(0);
+          const text = firstPage.getText();
+          if (text.trim() === "") {
+            mergedDoc.deletePage(0);
+          }
+        } catch {
+          // If getText fails, keep the page
+        }
+      }
+      
       const mergedDocument = await mergedDoc.saveToBuffer(COMPRESSION_OPTIONS);
       return mergedDocument.asUint8Array();
     } finally {

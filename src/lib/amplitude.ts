@@ -1,8 +1,20 @@
 import * as amplitude from '@amplitude/analytics-browser';
 import { getSystemInfo } from './system-info';
 
-// Initialize Amplitude only in browser context
-if (typeof window !== 'undefined') {
+// Check if we're in a test environment
+const isTestEnvironment = typeof window !== 'undefined' && (
+  // Vitest sets NODE_ENV to 'test'
+  import.meta.env.NODE_ENV === 'test' ||
+  // Check for common test runners
+  window.navigator?.userAgent?.includes('jsdom') ||
+  // Check for vitest global
+  'vi' in globalThis ||
+  // Check for test-specific environment variables
+  import.meta.env.VITE_TEST === 'true'
+);
+
+// Initialize Amplitude only in browser context and not during tests
+if (typeof window !== 'undefined' && !isTestEnvironment) {
   amplitude.init(import.meta.env.VITE_AMPLITUDE_API_KEY, {
     identityStorage: 'localStorage', 
     defaultTracking: {  
@@ -18,7 +30,7 @@ const systemInfo = getSystemInfo();
 
 // Export a function to track events
 export function trackEvent(eventName: string, eventProperties?: Record<string, unknown>) {
-  if (typeof window === 'undefined') return; // Skip tracking in server context
+  if (typeof window === 'undefined' || isTestEnvironment) return; // Skip tracking in server context or tests
   
   amplitude.track(eventName, {
     ...systemInfo,
@@ -28,7 +40,7 @@ export function trackEvent(eventName: string, eventProperties?: Record<string, u
 
 // Track errors with detailed information
 export function trackError(error: Error | string, additionalProperties?: Record<string, unknown>) {
-  if (typeof window === 'undefined') return; // Skip tracking in server context
+  if (typeof window === 'undefined' || isTestEnvironment) return; // Skip tracking in server context or tests
   
   const errorObj = typeof error === 'string' ? new Error(error) : error;
   

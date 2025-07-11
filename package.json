@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest --config vite.config.test.ts",
+    "test:ui": "vitest --ui --config vite.config.test.ts"
   },
   "dependencies": {
     "@amplitude/analytics-browser": "2.9.2",
@@ -37,22 +39,27 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
     "@types/chrome": "^0.0.323",
     "@types/node": "^22.5.5",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.17",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
+    "jsdom": "^26.1.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1",
-    "vite-plugin-copy": "^0.1.6"
+    "vite-plugin-copy": "^0.1.6",
+    "vitest": "^3.2.4"
   }
 }
