@@ -6,22 +6,12 @@ import { cn } from "@/lib/utils";
 import { useRef } from "react";
 
 interface EmptyStateCardProps {
-  isDragActive: boolean;
   isProcessing: boolean;
-  onDrop: (event: React.DragEvent<Element>) => void;
-  onDragOver: (event: React.DragEvent<Element>) => void;
-  onDragEnter: (event: React.DragEvent<Element>) => void;
-  onDragLeave: (event: React.DragEvent<Element>) => void;
   onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function EmptyStateCard({
-  isDragActive,
   isProcessing,
-  onDrop,
-  onDragOver,
-  onDragEnter,
-  onDragLeave,
   onFileSelect,
 }: EmptyStateCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,13 +22,8 @@ export function EmptyStateCard({
         <div
           className={cn(
             "drop-zone",
-            isDragActive && "drop-zone-active",
             isProcessing && "drop-zone-disabled"
           )}
-          onDrop={isProcessing ? undefined : onDrop}
-          onDragOver={isProcessing ? undefined : onDragOver}
-          onDragEnter={isProcessing ? undefined : onDragEnter}
-          onDragLeave={isProcessing ? undefined : onDragLeave}
           style={{ cursor: isProcessing ? 'not-allowed' : 'default' }}
         >
           <img src="/icons/upload-cloud.svg" alt="Upload" className="upload-icon" />

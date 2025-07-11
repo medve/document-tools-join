@@ -29,12 +29,7 @@ interface DragAndDropCardGridProps {
   items: CardItem[];
   onDelete: (id: string) => void;
   onReorder: (newItems: CardItem[]) => void;
-  isDragActive: boolean;
   isProcessing: boolean;
-  onDrop: (event: React.DragEvent<Element>, setIsDragActive: (v: boolean) => void) => void;
-  onDragOver: (event: React.DragEvent<Element>) => void;
-  onDragEnter: (event: React.DragEvent<Element>) => void;
-  onDragLeave: (event: React.DragEvent<Element>) => void;
   onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onRotate: (id: string) => void;
 }
@@ -157,14 +152,12 @@ function SortableCardWrapper({ item, onDelete, onRotate }: SortableCardWrapperPr
   );
 }
 
-export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDragActive, isProcessing, onDrop, onDragOver, onDragEnter, onDragLeave, onFileSelect, onRotate }: DragAndDropCardGridProps) {
+export default function DragAndDropCardGrid({ items, onDelete, onReorder, isProcessing, onFileSelect, onRotate }: DragAndDropCardGridProps) {
   const [internalItems, setInternalItems] = React.useState(items);
-  const [dragActive, setDragActive] = React.useState(isDragActive);
 
   React.useEffect(() => {
     setInternalItems(items);
-    setDragActive(isDragActive);
-  }, [items, isDragActive]);
+  }, [items]);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -179,9 +172,6 @@ export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDrag
     }
   }
 
-  function handleDrop(event: React.DragEvent<Element>) {
-    onDrop(event, setDragActive);
-  }
 
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -203,12 +193,7 @@ export default function DragAndDropCardGrid({ items, onDelete, onReorder, isDrag
       <SortableContext items={internalItems} strategy={rectSortingStrategy}>
         <div className="mx-auto max-w-[1040px] grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-2 sm:p-4 justify-center">
           <DragAndDropUploadCard
-            isDragActive={dragActive}
             isProcessing={isProcessing}
-            onDrop={handleDrop}
-            onDragOver={onDragOver}
-            onDragEnter={onDragEnter}
-            onDragLeave={onDragLeave}
             onFileSelect={onFileSelect}
           />
           {internalItems.map((item) => (

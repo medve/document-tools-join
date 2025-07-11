@@ -7,22 +7,12 @@ import { cn } from "@/lib/utils";
 import { useRef } from "react";
 
 interface DragAndDropUploadCardProps {
-  isDragActive: boolean;
   isProcessing: boolean;
-  onDrop: (event: React.DragEvent<Element>) => void;
-  onDragOver: (event: React.DragEvent<Element>) => void;
-  onDragEnter: (event: React.DragEvent<Element>) => void;
-  onDragLeave: (event: React.DragEvent<Element>) => void;
   onFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export function DragAndDropUploadCard({
-  isDragActive,
   isProcessing,
-  onDrop,
-  onDragOver,
-  onDragEnter,
-  onDragLeave,
   onFileSelect,
 }: DragAndDropUploadCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,15 +25,9 @@ export function DragAndDropUploadCard({
       <Card
         className={cn(
           "relative w-full h-full flex flex-col justify-center items-center p-0 select-none bg-white dark:bg-[#182B47] transition-all duration-200",
-          isDragActive
-            ? "border-2 border-dashed border-[#3072DE] outline-none shadow-md"
-            : "border-2 border-dashed border-gray-300 outline-none",
+          "border-2 border-dashed border-gray-300 outline-none",
           isProcessing && "opacity-50 pointer-events-none"
         )}
-        onDrop={isProcessing ? undefined : onDrop}
-        onDragOver={isProcessing ? undefined : onDragOver}
-        onDragEnter={isProcessing ? undefined : onDragEnter}
-        onDragLeave={isProcessing ? undefined : onDragLeave}
         style={{ cursor: isProcessing ? 'not-allowed' : 'pointer', width: '100%', height: '100%', borderRadius: 8 }}
         tabIndex={0}
       >

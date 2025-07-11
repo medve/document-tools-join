@@ -28,7 +28,7 @@ interface FileItem {
 const App: React.FC = () => {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [previews, setPreviews] = useState<Record<string, string | null>>({});
-  const [isDragActive, setIsDragActive] = useState<boolean>(false);
+  const [isPageDragActive, setIsPageDragActive] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [mergedPdfUrl, setMergedPdfUrl] = useState<string | null>(null);
   const [mergedPdfBlob, setMergedPdfBlob] = useState<Blob | null>(null);
@@ -45,10 +45,6 @@ const App: React.FC = () => {
 
   // File handlers
   const {
-    handleDrop,
-    handleDragOver,
-    handleDragEnter,
-    handleDragLeave,
     handleFileInput,
     handleDelete,
     handleClear,
@@ -82,6 +78,73 @@ const App: React.FC = () => {
   useEffect(() => {
     if (isWorkerInitialized) generatePreviews();
   }, [files, isWorkerInitialized, generatePreviews]);
+
+  // Page-wide drag and drop handlers
+  useEffect(() => {
+    let dragCounter = 0;
+
+    const handlePageDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      dragCounter++;
+      if (dragCounter === 1) {
+        setIsPageDragActive(true);
+      }
+    };
+
+    const handlePageDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      dragCounter--;
+      if (dragCounter === 0) {
+        setIsPageDragActive(false);
+      }
+    };
+
+    const handlePageDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.dataTransfer!.dropEffect = 'copy';
+    };
+
+    const handlePageDrop = (e: DragEvent) => {
+      e.preventDefault();
+      dragCounter = 0;
+      setIsPageDragActive(false);
+      
+      const droppedFiles = Array.from(e.dataTransfer?.files || []).filter(
+        (file) => file.type === 'application/pdf'
+      );
+      
+      if (droppedFiles.length) {
+        const newFileItems: FileItem[] = droppedFiles.map(file => ({ id: generateId(), file }));
+        setFiles((prev) => [...prev, ...newFileItems]);
+        setPreviews((prev) => {
+          const next = { ...prev };
+          newFileItems.forEach(item => {
+            next[item.id] = null;
+          });
+          return next;
+        });
+        trackEvent('files_added', {
+          method: 'page_drop',
+          count: newFileItems.length,
+          names: newFileItems.map(f => f.file.name),
+          sizes: newFileItems.map(f => f.file.size)
+        });
+      }
+    };
+
+    // Add event listeners to document
+    document.addEventListener('dragenter', handlePageDragEnter);
+    document.addEventListener('dragleave', handlePageDragLeave);
+    document.addEventListener('dragover', handlePageDragOver);
+    document.addEventListener('drop', handlePageDrop);
+
+    return () => {
+      document.removeEventListener('dragenter', handlePageDragEnter);
+      document.removeEventListener('dragleave', handlePageDragLeave);
+      document.removeEventListener('dragover', handlePageDragOver);
+      document.removeEventListener('drop', handlePageDrop);
+    };
+  }, []);
 
   // Merge handler
   const handleMerge = useCallback(async () => {
@@ -282,6 +345,25 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Page-wide drag overlay */}
+      {isPageDragActive && !mergedPdfUrl && (
+        <div className="fixed inset-0 z-40 bg-blue-500/20 dark:bg-blue-400/20 flex items-center justify-center pointer-events-none">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 flex flex-col items-center max-w-md mx-4">
+            <div className="flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-4">
+              <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 font-gabarito">
+              Drop files here
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 text-center font-gabarito">
+              Release to add PDF files to your collection
+            </p>
+          </div>
+        </div>
+      )}
       {/* Main grid area */}
       <main className="flex-1 flex items-start justify-center px-2 py-6 pt-24">
         {mergedPdfUrl ? (
@@ -316,12 +398,7 @@ const App: React.FC = () => {
           </div>
         ) : files.length === 0 ? (
           <EmptyStateCard
-            isDragActive={isDragActive}
             isProcessing={isProcessing}
-            onDrop={e => handleDrop(e, setIsDragActive)}
-            onDragOver={handleDragOver}
-            onDragEnter={e => handleDragEnter(e, setIsDragActive)}
-            onDragLeave={e => handleDragLeave(e, setIsDragActive)}
             onFileSelect={handleFileInput}
           />
         ) : (
@@ -330,12 +407,7 @@ const App: React.FC = () => {
               items={files.map(f => ({ id: f.id, name: cropFileName(f.file.name), preview: previews[f.id] }))}
               onDelete={handleDelete}
               onReorder={handleReorder}
-              isDragActive={isDragActive}
               isProcessing={isProcessing}
-              onDrop={(e) => handleDrop(e, setIsDragActive)}
-              onDragOver={handleDragOver}
-              onDragEnter={(e) => handleDragEnter(e, setIsDragActive)}
-              onDragLeave={(e) => handleDragLeave(e, setIsDragActive)}
               onFileSelect={handleFileInput}
               onRotate={handleRotate}
             />
